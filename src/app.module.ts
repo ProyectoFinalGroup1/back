@@ -3,8 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SupabaseModule } from './Config/supabase.module';
 
-console.log('ESE : ', process.env.DATABASE_URL);
-
 @Module({
   imports: [
     ConfigModule.forRoot({
