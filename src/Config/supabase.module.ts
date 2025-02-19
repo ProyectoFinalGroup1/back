@@ -13,7 +13,6 @@ const supabaseProvider = {
       );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     return createClient(supabaseUrl, supabaseKey);
   },
   inject: [ConfigService],
