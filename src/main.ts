@@ -5,8 +5,12 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Habilitar CORS
-  app.enableCors();
+  // Habilitar CORS para permitir peticiones desde el frontend en localhost:3001
+  app.enableCors({
+    origin: 'http://localhost:3001',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   // Configuración de Swagger
   const swaggerConfig = new DocumentBuilder()
@@ -19,12 +23,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
 
-  // Usar variable de entorno PORT
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
-
-  // Loguear la URL después de que el servidor haya iniciado
-  const url = await app.getUrl();
-  console.log(`Application is running on: ${url}`);
+  await app.listen(3000);
 }
 bootstrap();
