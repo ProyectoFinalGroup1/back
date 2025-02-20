@@ -3,6 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SupabaseModule } from './Config/supabase.module';
 import { InhumadosModule } from './Modules/Inhumado/inhumado.module';
+import { UserModule } from './Modules/User/user.module';
+import { AuthModule } from './Modules/Auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -12,6 +15,8 @@ import { InhumadosModule } from './Modules/Inhumado/inhumado.module';
     }),
     SupabaseModule,
     InhumadosModule,
+    UserModule,
+    AuthModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
@@ -20,6 +25,11 @@ import { InhumadosModule } from './Modules/Inhumado/inhumado.module';
       synchronize: true,
       migrationsRun: true,
       logging: true,
+    }),
+    JwtModule.register({
+      global: true,
+      signOptions: { expiresIn: '1h' },
+      secret: process.env.JWT_SECRET,
     }),
   ],
   controllers: [],
