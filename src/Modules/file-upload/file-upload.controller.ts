@@ -12,13 +12,15 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Inhumados')
+@ApiTags('Files')
 @Controller('files')
 export class FileUploadController {
   constructor(private readonly fileUploadService: FileUploadService) {}
 
+  @ApiOperation({ summary: 'Subir imagen para un inhumado específico' })
+  // @ApiBearerAuth()
   @Post('uploadImage/:inhumadoId')
   @UseInterceptors(FileInterceptor('file'))
   async uploadInhumadoImage(
