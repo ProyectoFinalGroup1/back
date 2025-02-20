@@ -5,6 +5,9 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Habilitar CORS
+  app.enableCors();
+
   // Configuración de Swagger
   const swaggerConfig = new DocumentBuilder()
     .setTitle('API Cementerio Parque Valle de Paz')
@@ -16,6 +19,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
+  // Usar variable de entorno PORT
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+
+  // Loguear la URL después de que el servidor haya iniciado
+  const url = await app.getUrl();
+  console.log(`Application is running on: ${url}`);
 }
 bootstrap();
