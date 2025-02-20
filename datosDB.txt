@@ -1,5 +1,5 @@
 ----DATOS PARA SUPABASE------
-
+-Ubicacion :  src/config/.env
 
 SUPABASE_PASSWORD=Administrador123
 SUPABASE_URL=hhtp://wbdarmsigbqzvkvcezkt.supabase.co
