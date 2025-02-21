@@ -30,9 +30,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth() {
-    // Inicia la autenticación con Google
-  }
+  async googleAuth() {}
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
@@ -41,7 +39,7 @@ export class AuthController {
     const user = req.user;
     console.log('User authenticated via Google:', user);
 
-    res.send({ message: 'Conexión exitosa con Google', user: user });
+    res.send({ message: 'Conexión exitosa con Google', user: user }); //modificar con URL de home
   }
   ///******///
   // Redirigir al frontend o devolver una respuesta

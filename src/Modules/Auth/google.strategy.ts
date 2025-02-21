@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
@@ -42,7 +40,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const userData = {
       email: emails[0].value, // Email de Google
       nombre: name.givenName, // Nombre de Google
-      apellido: name?.familyName || 'N/a', // Apellido de Google
+      apellido: name?.familyName || 'N/a', // Apellido de Google, en caso de no tener solo se colocara 'N/a'
       dni: id.slice(0, 10), // dni sera los primeros 10 digitos del idGoogle del usuario
       password: emails[0].value, //password sera el mismo email de usuario
     };
