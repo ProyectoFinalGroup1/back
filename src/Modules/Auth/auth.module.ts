@@ -10,9 +10,9 @@ import { GoogleStrategy } from './google.strategy';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    ///// implementacion google
-    PassportModule.register({ defaultStrategy: 'google' }), // Configura el módulo Passport con Google
-    ConfigModule, // Para usar variables de entorno
+    // implementacion google
+    PassportModule.register({ defaultStrategy: 'google' }),
+    ConfigModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, GoogleStrategy],

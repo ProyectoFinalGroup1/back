@@ -17,7 +17,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
     // Comprobamos si las variables de entorno están definidas
     if (!clientID || !clientSecret) {
-      throw new Error('Google Client ID and Client Secret are required!');
+      throw new Error('Google Client ID y Client Secret son requeridas');
     }
 
     super({
@@ -30,23 +30,21 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
-    req: any,
+    req: Request,
     accessToken: string,
     refreshToken: string,
     profile: any,
     done: VerifyCallback,
   ): Promise<any> {
-    const { name, emails } = profile;
+    const { name, emails, id } = profile;
 
     // Mapeo de los datos de Google a la entidad User
     const userData = {
       email: emails[0].value, // Email de Google
-      nombre: name.firstName, // Nombre (First name) de Google
-      apellido: name.lastName || 'Desconocido', // Apellido (Last name) de Google
-      password: ' ',
-      //dni:
-
-      //crea un problema dejar sin contrase;a a usuario creado con google, se podria logear solo con correo y password vacio
+      nombre: name.givenName, // Nombre de Google
+      apellido: name?.familyName || 'N/a', // Apellido de Google
+      dni: id.slice(0, 10), // dni sera los primeros 10 digitos del idGoogle del usuario
+      password: emails[0].value, //password sera el mismo email de usuario
     };
 
     // Buscar si el usuario ya existe

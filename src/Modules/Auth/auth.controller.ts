@@ -28,7 +28,6 @@ export class AuthController {
     return await this.authService.login(auth);
   }
 
-  ///// implementacion de google
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
