@@ -22,6 +22,8 @@ export class InhumadoController {
     return { message: 'sedder exitoso' }; //borrar
   }
 
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
   @Get()
   @ApiOperation({ summary: 'Obtener lista de todos los inhumados' })
   async allInhumados() {
@@ -29,17 +31,26 @@ export class InhumadoController {
     return datos;
   }
 
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
   @Post("addInhumado")
+  @ApiOperation({ summary: 'Agregar un inhumados' })
   async addInhumado(@Body() inhumado: Inhumado){
       return await this.inhumadosService.addInhumado(inhumado)
   }
 
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
   @Get(':id') // cuiadado posicionamiento
+  @ApiOperation({ summary: 'Obtener un inhumado por id' })
   async getInhumadoById(@Param('id', ParseUUIDPipe) id: string) { 
     return await this.inhumadosService.getInhumadoById(id)
   }
 
+  
   @Get('/:nombre/:apellido')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Obtener un inhumado por nombre y apellido' })
   async getInhumadoByNombreApellido(
       @Param('nombre') nombre: string,
       @Param('apellido') apellido: string,
@@ -48,11 +59,17 @@ export class InhumadoController {
   }
 
   @Put(':id')
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @ApiOperation({ summary: 'Acutualizar un inhumado por id' })
   async updateInhumado(@Param('id', ParseUUIDPipe) id: string, @Body() inhumado: Partial<Inhumado>) {  
       return await this.inhumadosService.updateInhumado(id, inhumado)
   } 
 
   @Delete(':id') 
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Borrar un inhumado por id' })
   async deleteProduct(@Param('id', ParseUUIDPipe) id: string) { 
     return await this.inhumadosService.deleteInhumado(id)
     }
