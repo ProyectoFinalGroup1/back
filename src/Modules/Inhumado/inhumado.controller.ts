@@ -31,7 +31,7 @@ export class InhumadoController {
   constructor(private readonly inhumadosService: inhumadosService) {}
 
   @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard)
+  // @UseGuards(AuthGuard, RolesGuard)
   @Get('seeder')
   @ApiOperation({ summary: 'Obtener seeder :D' })
   async seed() {
@@ -39,8 +39,8 @@ export class InhumadoController {
     return { message: 'sedder exitoso' }; //borrar
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard)
+  // @Roles(Role.Admin)
+  // @UseGuards(AuthGuard, RolesGuard)
   @Get()
   @ApiOperation({ summary: 'Obtener lista de todos los inhumados' })
   @ApiResponse({
@@ -52,11 +52,11 @@ export class InhumadoController {
     const datos = await this.inhumadosService.allInhumados();
     return datos;
   }
-
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
   @Post('addInhumado')
   @ApiOperation({ summary: 'Agregar un inhumados' })
+
   @ApiResponse({
     status: 200,
     description: 'Lista de inhumados obtenida exitosamente',
@@ -112,6 +112,7 @@ export class InhumadoController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Acutualizar un inhumado por id' })
+
   @ApiParam({
     name: 'id',
     type: 'string',
@@ -133,6 +134,7 @@ export class InhumadoController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Borrar un inhumado por id' })
+
   @ApiParam({
     name: 'id',
     type: 'string',
