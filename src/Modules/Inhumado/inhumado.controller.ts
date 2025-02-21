@@ -1,8 +1,6 @@
-
 import { Controller, Get, UseGuards } from '@nestjs/common';
 
-import { Controller, Get } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { inhumadosService } from './inhumado.service';
 import { Roles } from '../Guards/Roles/roles.decorator';

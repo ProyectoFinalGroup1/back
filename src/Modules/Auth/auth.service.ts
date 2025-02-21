@@ -77,6 +77,5 @@ export class AuthService {
       iat: new Date(decodedToken.iat * 1000),
       exp: new Date(decodedToken.exp * 1000),
     };
-    //// AGREGAR JWT PARA SEGUIMIENTO DE PAG WEB
   }
 }
