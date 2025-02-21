@@ -2,8 +2,8 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('inhumados')
 export class Inhumado {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
   @Column()
   apellido: string;
@@ -22,6 +22,9 @@ export class Inhumado {
 
   @Column()
   sector: string;
+
+  @Column({ nullable: true })
+  imagenUrl: string;
 
   @Column()
   manzana: number;
