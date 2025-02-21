@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('inhumados')
 export class Inhumado {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
@@ -37,7 +37,4 @@ export class Inhumado {
 
   @Column()
   ncliente: number;
-
-  @Column({ nullable: true })
-  imagenUrl: string;
 }
