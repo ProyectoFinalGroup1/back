@@ -34,4 +34,7 @@ export class Inhumado {
 
   @Column()
   ncliente: number;
+
+  @Column({ nullable: true })
+  imagenUrl: string;
 }

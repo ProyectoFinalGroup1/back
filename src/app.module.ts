@@ -3,9 +3,13 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SupabaseModule } from './Config/supabase.module';
 import { InhumadosModule } from './Modules/Inhumado/inhumado.module';
+
 import { UserModule } from './Modules/User/user.module';
 import { AuthModule } from './Modules/Auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+
+import { FileUploadModule } from './Modules/file-upload/file-upload.module';
+
 
 @Module({
   imports: [
@@ -15,8 +19,12 @@ import { JwtModule } from '@nestjs/jwt';
     }),
     SupabaseModule,
     InhumadosModule,
+
     UserModule,
     AuthModule,
+
+    FileUploadModule,
+
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
