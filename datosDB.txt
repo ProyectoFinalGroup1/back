@@ -1,7 +1,0 @@
-----DATOS PARA SUPABASE------
--Ubicacion :  src/config/.env
-
-SUPABASE_PASSWORD=Administrador123
-SUPABASE_URL=hhtp://wbdarmsigbqzvkvcezkt.supabase.co
-SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiZGFybXNpZ2JxenZrdmNlemt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5NjUzNjgsImV4cCI6MjA1NTU0MTM2OH0.9lIBbk3dbvvkZ_ClkmsMpvPDmmciYgxY6_yJU9J5mUA
-DATABASE_URL=postgresql://postgres.wbdarmsigbqzvkvcezkt:Administrador123@aws-0-us-west-1.pooler.supabase.com:6543/postgres

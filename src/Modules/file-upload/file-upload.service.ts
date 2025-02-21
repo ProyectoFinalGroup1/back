@@ -25,10 +25,10 @@ export class FileUploadService {
 
   async uploadInhumadoImage(
     file: Express.Multer.File,
-    inhumadoId: number,
+    inhumadoId: string,
   ): Promise<{ imageUrl: string }> {
-    const inhumado = await this.inhumadoRepository.findOne({
-      where: { id: inhumadoId },
+    const inhumado = await this.inhumadoRepository.findOneBy({
+      id: inhumadoId,
     });
 
     if (!inhumado) {

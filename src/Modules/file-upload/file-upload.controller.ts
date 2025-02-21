@@ -7,6 +7,7 @@ import {
   Param,
   ParseFilePipe,
   ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -24,7 +25,7 @@ export class FileUploadController {
   @Post('uploadImage/:inhumadoId')
   @UseInterceptors(FileInterceptor('file'))
   async uploadInhumadoImage(
-    @Param('inhumadoId', ParseIntPipe) inhumadoId: number,
+    @Param('inhumadoId', ParseUUIDPipe) inhumadoId: string,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
