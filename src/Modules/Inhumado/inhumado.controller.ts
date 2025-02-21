@@ -1,4 +1,3 @@
-
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, UseGuards  } from '@nestjs/common';
 import { inhumadosService } from './inhumado.service';
 import { Inhumado } from 'src/Entities/inhumados.entity';
