@@ -10,7 +10,7 @@ export class inhumadosService {
   constructor(
     @InjectRepository(Inhumado)
     private inhumadosRepository: Repository<Inhumado>,
-    private readonly InhumadosRepository: inhumadosRepository
+    private readonly InhumadosRepository: inhumadosRepository,
   ) {}
 
   async seed() {
@@ -46,31 +46,37 @@ export class inhumadosService {
     }
   }
 
-  async addInhumado (inhumado: Inhumado){
-    return this.InhumadosRepository.addInhumado(inhumado)
+  async addInhumado(inhumado: Inhumado) {
+    return this.InhumadosRepository.addInhumado(inhumado);
   }
 
-  async getInhumadoById(id): Promise<Inhumado> { 
-    const inhumado = await this.InhumadosRepository.getInhumadoById(id); 
-    if (!inhumado) { 
-      throw new NotFoundException('Inhumado no existente'); 
-    } 
-    return inhumado; 
-  }   
-
-  async getInhumadoByNombreApellido(nombre: string, apellido: string): Promise<Inhumado> {
-    const inhumado = await this.InhumadosRepository.getInhumadoByNombreApellido(nombre, apellido);
+  async getInhumadoById(id): Promise<Inhumado> {
+    const inhumado = await this.InhumadosRepository.getInhumadoById(id);
     if (!inhumado) {
       throw new NotFoundException('Inhumado no existente');
     }
     return inhumado;
   }
-  
-  updateInhumado(id: string, inhumado: Partial<Inhumado>){ 
-    return  this.InhumadosRepository.updateInhumado(id, inhumado); 
+
+  async getInhumadoByNombreApellido(
+    nombre: string,
+    apellido: string,
+  ): Promise<Inhumado> {
+    const inhumado = await this.InhumadosRepository.getInhumadoByNombreApellido(
+      nombre,
+      apellido,
+    );
+    if (!inhumado) {
+      throw new NotFoundException('Inhumado no existente');
+    }
+    return inhumado;
   }
 
-  deleteInhumado(id: string): Promise<string> { 
-    return  this.InhumadosRepository.deleteInhumado(id); 
+  updateInhumado(id: string, inhumado: Partial<Inhumado>) {
+    return this.InhumadosRepository.updateInhumado(id, inhumado);
+  }
+
+  deleteInhumado(id: string): Promise<string> {
+    return this.InhumadosRepository.deleteInhumado(id);
   }
 }
