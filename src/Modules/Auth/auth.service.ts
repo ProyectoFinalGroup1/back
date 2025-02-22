@@ -11,11 +11,13 @@ import * as bcrypt from 'bcrypt';
 import { RegisterUserDto } from '../DTO/RegisterUserDto';
 import { Role } from '../Guards/Roles/roles.enum';
 import { JwtService } from '@nestjs/jwt';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private emailService: EmailService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -42,6 +44,10 @@ export class AuthService {
     });
     console.log('este es el usuario que creamos', newUser);
     const user = await this.userRepository.save(newUser);
+
+    // Enviar email de bienvenida
+    await this.emailService.sendWelcomeEmail(userData.email, userData.nombre);
+
     return user;
   }
 
