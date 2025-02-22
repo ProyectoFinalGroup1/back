@@ -55,7 +55,6 @@ export class InhumadoController {
   @UseGuards(AuthGuard, RolesGuard)
   @Post('addInhumado')
   @ApiOperation({ summary: 'Agregar un inhumados' })
-
   @ApiResponse({
     status: 200,
     description: 'Lista de inhumados obtenida exitosamente',
@@ -111,7 +110,6 @@ export class InhumadoController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Acutualizar un inhumado por id' })
-
   @ApiParam({
     name: 'id',
     type: 'string',
@@ -133,7 +131,6 @@ export class InhumadoController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Borrar un inhumado por id' })
-
   @ApiParam({
     name: 'id',
     type: 'string',
