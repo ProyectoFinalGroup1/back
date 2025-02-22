@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { GoogleStrategy } from './google.strategy';
+import { MatchPassword } from '../Guards/Validates/MatchPassword';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { GoogleStrategy } from './google.strategy';
     ConfigModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy],
+  providers: [AuthService, GoogleStrategy, MatchPassword],
   exports: [AuthService],
 })
 export class AuthModule {}
