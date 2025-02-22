@@ -6,6 +6,8 @@ import {
   Req,
   Res,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from '../DTO/RegisterUserDto';
@@ -31,6 +33,7 @@ export class AuthController {
     status: 400,
     description: 'Datos de registro inválidos',
   })
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   async createUser(@Body() userData: RegisterUserDto): Promise<User> {
     return await this.authService.register(userData);
   }

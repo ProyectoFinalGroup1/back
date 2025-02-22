@@ -1,5 +1,7 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+
+import { IsEmail, IsNotEmpty, Validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { MatchPassword } from '../Guards/Validates/MatchPassword';
 
 export class RegisterUserDto {
   @ApiProperty({
@@ -42,4 +44,8 @@ export class RegisterUserDto {
   })
   @IsNotEmpty()
   password: string;
+
+  @IsNotEmpty()
+  @Validate(MatchPassword, ['password'])
+  passwordConfirm: string;
 }
