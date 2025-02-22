@@ -13,7 +13,6 @@ import { inhumadosService } from './inhumado.service';
 import { Inhumado } from 'src/Entities/inhumados.entity';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -142,7 +141,15 @@ export class InhumadoController {
     status: 200,
     description: 'Inhumado eliminado exitosamente',
   })
-  async deleteProduct(@Param('id', ParseUUIDPipe) id: string) {
+  @ApiResponse({
+    status: 400,
+    description: 'Error al agregar el inhumado',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Inhumado no encontrado',
+  })
+  async deleteInhumado(@Param('id', ParseUUIDPipe) id: string) {
     return await this.inhumadosService.deleteInhumado(id);
   }
 }
