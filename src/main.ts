@@ -19,6 +19,15 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('Inhumados')
     .addTag('Files')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Ingresa tu token JWT aquí',
+      },
+      'Bearer',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
