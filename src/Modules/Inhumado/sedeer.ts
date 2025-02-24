@@ -1,6 +1,6 @@
 export const seedInhumados = [
   {
-    id: 1,
+    id: '1',
     apellido: 'Abdelnur',
     nombre: 'Jose Antonio',
     fnac: '25 de Febrero de 1943',
@@ -13,7 +13,7 @@ export const seedInhumados = [
     ncliente: 93,
   },
   {
-    id: 2,
+    id: '2',
     apellido: 'Aboy',
     nombre: 'Maria Delia',
     fnac: '6 de Agosto de 1910',
@@ -26,7 +26,7 @@ export const seedInhumados = [
     ncliente: 758,
   },
   {
-    id: 3,
+    id: '3',
     apellido: 'Accattoli',
     nombre: 'Magdalena Eulalia',
     fnac: '22 de Julio de 1909',
@@ -39,7 +39,7 @@ export const seedInhumados = [
     ncliente: 3071,
   },
   {
-    id: 4,
+    id: '4',
     apellido: 'Acevedo',
     nombre: 'Aida Rosa',
     fnac: '8 de Agosto de 1916',
@@ -52,7 +52,7 @@ export const seedInhumados = [
     ncliente: 1809,
   },
   {
-    id: 5,
+    id: '5',
     apellido: 'Acosta',
     nombre: 'Marcela Beatriz',
     fnac: '16 de Agosto de 1965',
@@ -65,7 +65,7 @@ export const seedInhumados = [
     ncliente: 3242,
   },
   {
-    id: 6,
+    id: '6',
     apellido: 'Acosta',
     nombre: 'Oscar Omar (Milo)',
     fnac: '10 de Septiembre de 1929',
@@ -78,7 +78,7 @@ export const seedInhumados = [
     ncliente: 3242,
   },
   {
-    id: 7,
+    id: '7',
     apellido: 'Acosta',
     nombre: 'Maria del Carmen',
     fnac: '31 de Diciembre de 1913',
@@ -91,7 +91,7 @@ export const seedInhumados = [
     ncliente: 993,
   },
   {
-    id: 8,
+    id: '8',
     apellido: 'Acosta',
     nombre: 'Ramón',
     fnac: '7 de Septiembre de 1921',
@@ -104,7 +104,7 @@ export const seedInhumados = [
     ncliente: 106,
   },
   {
-    id: 9,
+    id: '9',
     apellido: 'Acosta',
     nombre: 'Dionisio',
     fnac: '9 de Agosto de 1936',
@@ -117,7 +117,7 @@ export const seedInhumados = [
     ncliente: 3129,
   },
   {
-    id: 10,
+    id: '10',
     apellido: 'Acosta Vda. De Gomez',
     nombre: 'Olimpia',
     fnac: '10 de Mayo de 1926',
@@ -130,7 +130,7 @@ export const seedInhumados = [
     ncliente: 376,
   },
   {
-    id: 11,
+    id: '11',
     apellido: 'Acuña',
     nombre: 'Miguel Horacio',
     fnac: '4 de Julio de 1929',
@@ -143,7 +143,7 @@ export const seedInhumados = [
     ncliente: 1588,
   },
   {
-    id: 13,
+    id: '13',
     apellido: 'Acuña',
     nombre: 'Camilo',
     fnac: '18 de Julio de 1911',
@@ -156,7 +156,7 @@ export const seedInhumados = [
     ncliente: 1764,
   },
   {
-    id: 14,
+    id: '14',
     apellido: 'Acuña',
     nombre: 'Pedro Enrique',
     fnac: '28 de Junio de 1928',
@@ -169,7 +169,7 @@ export const seedInhumados = [
     ncliente: 1805,
   },
   {
-    id: 15,
+    id: '15',
     apellido: 'Adin',
     nombre: 'Pantaleon',
     fnac: '18 de Julio de 1918',
@@ -182,7 +182,7 @@ export const seedInhumados = [
     ncliente: 1261,
   },
   {
-    id: 16,
+    id: '16',
     apellido: 'Agudo',
     nombre: 'Ines',
     fnac: '-',
@@ -195,7 +195,7 @@ export const seedInhumados = [
     ncliente: 2025,
   },
   {
-    id: 18,
+    id: '18',
     apellido: 'Agueda',
     nombre: 'Jose Elidor',
     fnac: '-',
@@ -208,7 +208,7 @@ export const seedInhumados = [
     ncliente: 547,
   },
   {
-    id: 19,
+    id: '19',
     apellido: 'Aguilera',
     nombre: 'Juan Jose',
     fnac: '21 de Mayo de 1953',
@@ -221,7 +221,7 @@ export const seedInhumados = [
     ncliente: 3365,
   },
   {
-    id: 20,
+    id: '20',
     apellido: 'Aguirre',
     nombre: 'Zulema',
     fnac: '23 de Junio de 1935',
@@ -234,7 +234,7 @@ export const seedInhumados = [
     ncliente: 1709,
   },
   {
-    id: 21,
+    id: '21',
     apellido: 'Aguirre',
     nombre: 'Maria Luisa',
     fnac: '-',
@@ -247,7 +247,7 @@ export const seedInhumados = [
     ncliente: 848,
   },
   {
-    id: 22,
+    id: '22',
     apellido: 'Aguirrez',
     nombre: 'Teresita Ana',
     fnac: '22 de Septiembre de 1934',
@@ -260,7 +260,7 @@ export const seedInhumados = [
     ncliente: 1582,
   },
   {
-    id: 23,
+    id: '23',
     apellido: 'Ahumada',
     nombre: 'Manuel Diogenes',
     fnac: '6 de Marzo de 1925',
@@ -273,7 +273,7 @@ export const seedInhumados = [
     ncliente: 854,
   },
   {
-    id: 24,
+    id: '24',
     apellido: 'Albiano',
     nombre: 'Francisco Domingo',
     fnac: '17 de Mayo de 1904',
@@ -286,7 +286,7 @@ export const seedInhumados = [
     ncliente: 1346,
   },
   {
-    id: 25,
+    id: '25',
     apellido: 'Albiati',
     nombre: 'Enrique Juan',
     fnac: '10 de Marzo de 1920',
@@ -299,7 +299,7 @@ export const seedInhumados = [
     ncliente: 926,
   },
   {
-    id: 26,
+    id: '26',
     apellido: 'Albino Garzon',
     nombre: 'Freddy Alberto',
     fnac: '15 de Diciembre de 1984',
@@ -312,7 +312,7 @@ export const seedInhumados = [
     ncliente: 3143,
   },
   {
-    id: 27,
+    id: '27',
     apellido: 'Albornoz',
     nombre: 'Andres Ramon',
     fnac: '10 de Noviembre de 1926',
@@ -325,7 +325,7 @@ export const seedInhumados = [
     ncliente: 726,
   },
   {
-    id: 28,
+    id: '28',
     apellido: 'Aldana Maciel',
     nombre: 'Lorenza Ignacia',
     fnac: '5 de Septiembre de 1910',
@@ -338,7 +338,7 @@ export const seedInhumados = [
     ncliente: 1548,
   },
   {
-    id: 29,
+    id: '29',
     apellido: 'Alegre',
     nombre: 'Amada Eleuteria',
     fnac: '4 de Marzo de 1922',
@@ -351,7 +351,7 @@ export const seedInhumados = [
     ncliente: 1701,
   },
   {
-    id: 30,
+    id: '30',
     apellido: 'Alesandro',
     nombre: 'Angela',
     fnac: '16 de Octubre de 1917',
@@ -364,7 +364,7 @@ export const seedInhumados = [
     ncliente: 130,
   },
   {
-    id: 31,
+    id: '31',
     apellido: 'Alfenoni',
     nombre: 'Dante Felix',
     fnac: '12 de Julio de 1921',
@@ -377,7 +377,7 @@ export const seedInhumados = [
     ncliente: 1153,
   },
   {
-    id: 32,
+    id: '32',
     apellido: 'Almiron',
     nombre: 'Maria Armenia (Nina)',
     fnac: '6 de Octubre de 1930',
@@ -390,7 +390,7 @@ export const seedInhumados = [
     ncliente: 3220,
   },
   {
-    id: 33,
+    id: '33',
     apellido: 'Alomo',
     nombre: 'Justa Pastora',
     fnac: '27 de Julio de 1944',
@@ -403,7 +403,7 @@ export const seedInhumados = [
     ncliente: 3223,
   },
   {
-    id: 34,
+    id: '34',
     apellido: 'Alonso',
     nombre: 'Atilano',
     fnac: '16 de Junio de 1964',
@@ -416,7 +416,7 @@ export const seedInhumados = [
     ncliente: 3417,
   },
   {
-    id: 35,
+    id: '35',
     apellido: 'Alonso',
     nombre: 'Raul Federico',
     fnac: '19 de Diciembre de 1924',
@@ -429,7 +429,7 @@ export const seedInhumados = [
     ncliente: 1471,
   },
   {
-    id: 37,
+    id: '37',
     apellido: 'Alpuin',
     nombre: 'Maria Delfina',
     fnac: '26 de Abril de 1915',
@@ -442,7 +442,7 @@ export const seedInhumados = [
     ncliente: 163,
   },
   {
-    id: 38,
+    id: '38',
     apellido: 'Alvarez',
     nombre: 'Agustina Rosa',
     fnac: '28 de Agosto de 1909',
@@ -455,7 +455,7 @@ export const seedInhumados = [
     ncliente: 943,
   },
   {
-    id: 39,
+    id: '39',
     apellido: 'Alvarez',
     nombre: 'Petronila Pascuala (Tita)',
     fnac: '17 de Mayo de 1913',
@@ -468,7 +468,7 @@ export const seedInhumados = [
     ncliente: 3145,
   },
   {
-    id: 40,
+    id: '40',
     apellido: 'Alvarez Latorre',
     nombre: 'Maria',
     fnac: '22 de Julio de 1905',
@@ -481,7 +481,7 @@ export const seedInhumados = [
     ncliente: 1471,
   },
   {
-    id: 41,
+    id: '41',
     apellido: 'Amado',
     nombre: 'Lorenza',
     fnac: '-',
@@ -494,7 +494,7 @@ export const seedInhumados = [
     ncliente: 845,
   },
   {
-    id: 42,
+    id: '42',
     apellido: 'Amaya',
     nombre: 'Casilda del Carmen',
     fnac: '16 de Julio de 1915',
@@ -507,7 +507,7 @@ export const seedInhumados = [
     ncliente: 3168,
   },
   {
-    id: 43,
+    id: '43',
     apellido: 'Ambrosini',
     nombre: 'Atilio',
     fnac: '29 de Mayo de 1918',
@@ -520,7 +520,7 @@ export const seedInhumados = [
     ncliente: 1612,
   },
   {
-    id: 44,
+    id: '44',
     apellido: 'Amenabal',
     nombre: 'Santiago',
     fnac: '25 de Mayo de 1923',
@@ -533,7 +533,7 @@ export const seedInhumados = [
     ncliente: 1279,
   },
   {
-    id: 45,
+    id: '45',
     apellido: 'Amoresano',
     nombre: 'Carla Grisel',
     fnac: '20 de Diciembre de 1980',
@@ -546,7 +546,7 @@ export const seedInhumados = [
     ncliente: 870,
   },
   {
-    id: 46,
+    id: '46',
     apellido: 'Angeleri',
     nombre: 'Zulema Rosa',
     fnac: '4 de Febrero de 1921',
@@ -559,7 +559,7 @@ export const seedInhumados = [
     ncliente: 92,
   },
   {
-    id: 47,
+    id: '47',
     apellido: 'Angeletti de Borra',
     nombre: 'Josefa Elena',
     fnac: '15 de Noviembre de 1924',
@@ -572,7 +572,7 @@ export const seedInhumados = [
     ncliente: 1492,
   },
   {
-    id: 48,
+    id: '48',
     apellido: 'Angelini',
     nombre: 'Raul Felipe',
     fnac: '18 de Julio de 1913',
@@ -585,7 +585,7 @@ export const seedInhumados = [
     ncliente: 1305,
   },
   {
-    id: 49,
+    id: '49',
     apellido: 'Angeloni',
     nombre: 'Miguel Angel',
     fnac: '-',
@@ -598,7 +598,7 @@ export const seedInhumados = [
     ncliente: 494,
   },
   {
-    id: 50,
+    id: '50',
     apellido: 'Aquin',
     nombre: 'Alberto Omar',
     fnac: '11 de Septiembre de 1940',

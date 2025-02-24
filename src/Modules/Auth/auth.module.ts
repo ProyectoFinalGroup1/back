@@ -6,6 +6,8 @@ import { AuthService } from './auth.service';
 import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { GoogleStrategy } from './google.strategy';
+import { MatchPassword } from '../Guards/Validates/MatchPassword';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
@@ -13,9 +15,10 @@ import { GoogleStrategy } from './google.strategy';
     // implementacion google
     PassportModule.register({ defaultStrategy: 'google' }),
     ConfigModule,
+    EmailModule, // importamos el modulo de email
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy],
+  providers: [AuthService, GoogleStrategy, MatchPassword],
   exports: [AuthService],
 })
 export class AuthModule {}
