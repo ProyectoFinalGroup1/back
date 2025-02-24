@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { PublicacionesService } from "./publi.service";
 import { ApiOperation } from "@nestjs/swagger";
-import { AuthGuard } from "@nestjs/passport";
+import { AuthGuard } from "../Guards/Jwt/AuthGuards";
 import { Publicacion } from "src/Entities/publicaciones.entity";
 
 
