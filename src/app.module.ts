@@ -9,6 +9,7 @@ import { AuthModule } from './Modules/Auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 
 import { FileUploadModule } from './Modules/file-upload/file-upload.module';
+import { PublicacionesModule } from './Modules/publicaciones/publi.module';
 
 
 @Module({
@@ -19,6 +20,7 @@ import { FileUploadModule } from './Modules/file-upload/file-upload.module';
     }),
     SupabaseModule,
     InhumadosModule,
+    PublicacionesModule,
 
     UserModule,
     AuthModule,
