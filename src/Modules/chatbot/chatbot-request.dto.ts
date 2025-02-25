@@ -13,7 +13,7 @@ export class ChatbotRequestDto {
 
   @ApiProperty({
     description: 'Mensaje del usuario al chatbot',
-    example: '¿Cuáles son los  horarios de visita?',
+    example: '¿Cuáles son los horarios de visita?',
   })
   @IsNotEmpty()
   @IsString()
