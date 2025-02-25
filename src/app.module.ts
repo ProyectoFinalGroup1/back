@@ -9,7 +9,7 @@ import { AuthModule } from './Modules/Auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 
 import { FileUploadModule } from './Modules/file-upload/file-upload.module';
-
+import { DialogflowModule } from './Modules/chatbot/dialogflow.module';
 
 @Module({
   imports: [
@@ -19,10 +19,9 @@ import { FileUploadModule } from './Modules/file-upload/file-upload.module';
     }),
     SupabaseModule,
     InhumadosModule,
-
     UserModule,
     AuthModule,
-
+    DialogflowModule,
     FileUploadModule,
 
     TypeOrmModule.forRoot({
