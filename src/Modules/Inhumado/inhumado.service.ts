@@ -39,6 +39,10 @@ export class inhumadosService {
     }
     return inhumado;
   }
+
+  async getInhumadosByValle(valle: string): Promise<Inhumado[]> {
+    return await this.InhumadosRepository.getInhumadosByValle(valle);
+  }
   
   updateInhumado(id: string, inhumado: Partial<Inhumado>){ 
     return  this.InhumadosRepository.updateInhumado(id, inhumado); 
