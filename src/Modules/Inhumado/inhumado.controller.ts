@@ -51,6 +51,9 @@ export class InhumadoController {
     const datos = await this.inhumadosService.allInhumados();
     return datos;
   }
+
+
+
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
   @Post('addInhumado')
@@ -63,6 +66,8 @@ export class InhumadoController {
   async addInhumado(@Body() inhumado: Inhumado) {
     return await this.inhumadosService.addInhumado(inhumado);
   }
+
+
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
@@ -86,6 +91,9 @@ export class InhumadoController {
     return await this.inhumadosService.getInhumadoById(id);
   }
 
+
+
+
   @Get('/:nombre/:apellido')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Obtener un inhumado por nombre y apellido' })
@@ -104,6 +112,12 @@ export class InhumadoController {
       nombre,
       apellido,
     );
+  }
+
+  @Get('valle/:valle')
+  @UseGuards(AuthGuard)
+  async getInhumadosByValle(@Param('valle') valle: string): Promise<Inhumado[]> {
+    return await this.inhumadosService.getInhumadosByValle(valle);
   }
 
   @Put(':id')
@@ -126,6 +140,8 @@ export class InhumadoController {
   ) {
     return await this.inhumadosService.updateInhumado(id, inhumado);
   }
+
+
 
   @Delete(':id')
   @Roles(Role.Admin)

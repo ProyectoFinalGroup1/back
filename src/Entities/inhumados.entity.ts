@@ -1,5 +1,8 @@
+
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Publicacion } from './publicaciones.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
 
 @Entity('inhumados')
 export class Inhumado {
@@ -86,4 +89,7 @@ export class Inhumado {
   })
   @Column()
   ncliente: number;
+
+  @OneToMany(() => Publicacion, (publicacion) => publicacion.inhumado, { cascade: true })
+  publicaciones: Publicacion[];
 }
