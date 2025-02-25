@@ -36,6 +36,10 @@ async getInhumadoByNombreApellido(nombre: string, apellido: string) {
     return await this.inhumadosRepository.findOne({ where: { nombre, apellido } });
     }
 
+async getInhumadosByValle(valle: string): Promise<Inhumado[]> {
+  return await this.inhumadosRepository.find({ where: { valle } });
+}
+
 async updateInhumado(id: string, inhumado: Partial<Inhumado>){
     await this.inhumadosRepository.update(id,inhumado);
     const updateInhumado = await this.inhumadosRepository.findOneBy({id})
