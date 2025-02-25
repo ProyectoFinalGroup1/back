@@ -44,6 +44,11 @@ export class RegisterUserDto {
   @IsNotEmpty()
   password: string;
 
+  @ApiProperty({
+    description: 'Contraseña del usuario',
+    example: 'miContraseña123',
+    required: true,
+  })
   @IsNotEmpty()
   @Validate(MatchPassword, ['password'])
   passwordConfirm: string;

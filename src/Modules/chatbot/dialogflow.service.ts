@@ -9,16 +9,10 @@ dotenv.config(); // Cargar variables de entorno
 export class DialogflowService {
   private sessionClient: dialogflow.SessionsClient;
   private projectId: string;
-
   constructor() {
     const keyFile = process.env.DIALOGFLOW_KEY_FILE;
     const projectId = process.env.DIALOGFLOW_PROJECT_ID;
-
-    if (!keyFile) {
-      throw new Error(
-        'La variable de entorno DIALOGFLOW_KEY_FILE no está definida',
-      );
-    }
+    const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
 
     if (!projectId) {
       throw new Error(
@@ -26,12 +20,38 @@ export class DialogflowService {
       );
     }
 
-    const keyPath = path.resolve(process.cwd(), keyFile);
-    this.sessionClient = new dialogflow.SessionsClient({
-      keyFilename: keyPath,
-    });
-    this.projectId = projectId;
+    // Intentamos usar credenciales como JSON primero
+    if (credentials) {
+      try {
+        this.sessionClient = new dialogflow.SessionsClient({
+          credentials: JSON.parse(credentials),
+        });
+        this.projectId = projectId;
+      } catch (error) {
+        console.error('Error al parsear las credenciales JSON:', error);
+        throw new Error('Las credenciales JSON no son válidas');
+      }
+    }
+    // Si no hay JSON, intentamos usar el archivo
+    else if (keyFile) {
+      try {
+        const keyPath = path.resolve(process.cwd(), keyFile);
+        this.sessionClient = new dialogflow.SessionsClient({
+          keyFilename: keyPath,
+        });
+        this.projectId = projectId;
+      } catch (error) {
+        console.error('Error al cargar el archivo de credenciales:', error);
+        throw new Error('No se pudo cargar el archivo de credenciales');
+      }
+    }
+    // Si no hay credenciales de ningún tipo
+    else {
+      throw new Error('No hay credenciales disponibles para Dialogflow');
+    }
   }
+
+  // Método para enviar un mensaje a Dialogflow y obtener la respuesta
 
   async sendMessage(sessionId: string, text: string) {
     const sessionPath = this.sessionClient.projectAgentSessionPath(
