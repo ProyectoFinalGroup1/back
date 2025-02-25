@@ -10,6 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { FileUploadModule } from './Modules/file-upload/file-upload.module';
 import { PublicacionesModule } from './Modules/publicaciones/publi.module';
+import { MensajesVirgenModule } from './Modules/mensajesVirgen/menVir.module';
 
 
 @Module({
@@ -21,6 +22,7 @@ import { PublicacionesModule } from './Modules/publicaciones/publi.module';
     SupabaseModule,
     InhumadosModule,
     PublicacionesModule,
+    MensajesVirgenModule,
 
     UserModule,
     AuthModule,

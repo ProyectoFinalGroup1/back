@@ -12,12 +12,7 @@ export class PublicacionesRepository {
     @InjectRepository(Inhumado)
     private inhumadosRepository: Repository<Inhumado>,
   ) {}
-
-  async addPublicacion(publicacion: Partial<Publicacion>): Promise<string> {
-    const nuevaPublicacion = await this.publicacionesRepository.save(publicacion);
-    return nuevaPublicacion.id;
-  }
-
+  
   async getPublicacionesByInhumado(nombre: string): Promise<Publicacion[]> {
     const inhumado = await this.inhumadosRepository.findOne({
       where: { nombre },
@@ -30,6 +25,12 @@ export class PublicacionesRepository {
 
     return inhumado.publicaciones;
   }
+
+  async addPublicacion(publicacion: Partial<Publicacion>): Promise<string> {
+    const nuevaPublicacion = await this.publicacionesRepository.save(publicacion);
+    return nuevaPublicacion.id;
+  }
+
 
   async deletePublicacion(id: string): Promise<string> {
     const publicacion = await this.publicacionesRepository.findOneBy({ id });
