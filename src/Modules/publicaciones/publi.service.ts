@@ -6,9 +6,6 @@ import { Publicacion } from 'src/Entities/publicaciones.entity';
 export class PublicacionesService {
   constructor(private readonly publicacionesRepository: PublicacionesRepository) {}
 
-  async addPublicacion(publicacion: Publicacion) {
-    return await this.publicacionesRepository.addPublicacion(publicacion);
-  }
 
   async getPublicacionesByInhumado(nombre: string): Promise<Publicacion[]> {
     const publicaciones = await this.publicacionesRepository.getPublicacionesByInhumado(nombre);
@@ -17,6 +14,11 @@ export class PublicacionesService {
     }
     return publicaciones;
   }
+
+  async addPublicacion(publicacion: Publicacion): Promise<string> {
+    return await this.publicacionesRepository.addPublicacion(publicacion);
+  }
+
 
   async deletePublicacion(id: string): Promise<void> {
     const result = await this.publicacionesRepository.deletePublicacion(id);

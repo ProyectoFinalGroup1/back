@@ -1,6 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { ApiProperty } from '@nestjs/swagger';
+import { Publicacion } from './publicaciones.entity';
+import { MensajeAVirgen } from './mensajesVirgen.entity';
 
 @Entity('user')
 export class User {
@@ -59,4 +61,13 @@ export class User {
   })
   @Column({ type: 'boolean', default: false })
   isAdmin?: boolean;
+
+  @ApiProperty({
+    description: 'Publicaciones del usario'
+  })
+  @OneToMany(() => Publicacion, (publicacion) => publicacion.usuario, { cascade: true })
+  publicaciones: Publicacion[];
+
+  @OneToMany(() => MensajeAVirgen, (mensaje) => mensaje.usuario, { cascade: true })
+  mensajesAVirgen: MensajeAVirgen[];
 }
