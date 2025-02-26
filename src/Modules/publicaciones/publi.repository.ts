@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Publicacion } from 'src/Entities/publicaciones.entity';
 import { Inhumado } from 'src/Entities/inhumados.entity';
+import { User } from 'src/Entities/user.entity';
 
 @Injectable()
 export class PublicacionesRepository {
@@ -10,27 +11,43 @@ export class PublicacionesRepository {
     @InjectRepository(Publicacion)
     private publicacionesRepository: Repository<Publicacion>,
     @InjectRepository(Inhumado)
-    private inhumadosRepository: Repository<Inhumado>,
+    private inhumadosRepository: Repository<Inhumado>
   ) {}
   
   async getPublicacionesByInhumado(nombre: string): Promise<Publicacion[]> {
-    const inhumado = await this.inhumadosRepository.findOne({
-      where: { nombre },
-      relations: ['publicaciones'],
+    const publicaciones = await this.publicacionesRepository.find({
+        where: {
+            inhumado: { nombre },
+            aprobada: true, // Solo publicaciones aprobadas
+        },
+        relations: ['inhumado', 'usuario'],
     });
 
-    if (!inhumado) {
-      throw new NotFoundException('No se encontró el inhumado con ese nombre');
+    if (!publicaciones.length) {
+        throw new NotFoundException('No se encontró el inhumado con ese nombre o no tiene publicaciones aprobadas');
     }
 
-    return inhumado.publicaciones;
-  }
+    return publicaciones;
+}
 
-  async addPublicacion(publicacion: Partial<Publicacion>): Promise<string> {
-    const nuevaPublicacion = await this.publicacionesRepository.save(publicacion);
-    return nuevaPublicacion.id;
+async addPublicacion(publicacion: Partial<Publicacion>): Promise<string> {
+  if (!publicacion) {
+    throw new Error('Publicacion is undefined');
   }
+  const nuevaPublicacion = await this.publicacionesRepository.save(publicacion);
+  return nuevaPublicacion.id
+}
 
+  async aprobarPublicacion(id: string): Promise<Publicacion | null> {
+    const publicacion = await this.publicacionesRepository.findOne({ where: { id } });
+
+    if (!publicacion) {
+        return null;
+    }
+
+    publicacion.aprobada = true;
+    return await this.publicacionesRepository.save(publicacion);
+}
 
   async deletePublicacion(id: string): Promise<string> {
     const publicacion = await this.publicacionesRepository.findOneBy({ id });
