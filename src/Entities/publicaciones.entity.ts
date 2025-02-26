@@ -23,5 +23,8 @@ export class Publicacion {
 
   @CreateDateColumn()
   fechaPublicacion: Date;
+
+  @Column({ default: false, nullable: false  }) //  Inicialmente no está aprobada
+  aprobada: boolean;
 }
 

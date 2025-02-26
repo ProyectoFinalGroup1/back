@@ -7,9 +7,7 @@ import { inhumadosRepository } from './inhumado.repository';
 
 @Injectable()
 export class inhumadosService {
-  constructor(
-    @InjectRepository(Inhumado)
-    private readonly InhumadosRepository: inhumadosRepository
+  constructor(private readonly InhumadosRepository: inhumadosRepository
   ) {}
 
   seed(){

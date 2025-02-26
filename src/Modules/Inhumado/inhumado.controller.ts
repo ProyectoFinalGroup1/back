@@ -67,7 +67,31 @@ export class InhumadoController {
     return await this.inhumadosService.addInhumado(inhumado);
   }
 
+  @Get('nombre&apellido/:nombre/:apellido')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Obtener un inhumado por nombre y apellido' })
+  @ApiParam({ name: 'nombre', description: 'Nombre del inhumado' })
+  @ApiParam({ name: 'apellido', description: 'Apellido del inhumado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Inhumado encontrado',
+    type: Inhumado,
+  })
+  async getInhumadoByNombreApellido(
+    @Param('nombre') nombre: string,
+    @Param('apellido') apellido: string,
+  ): Promise<Inhumado> {
+    return await this.inhumadosService.getInhumadoByNombreApellido(
+      nombre,
+      apellido,
+    );
+  }
 
+  @Get('valle/:valle')
+  //@UseGuards(AuthGuard)
+  async getInhumadosByValle(@Param('valle') valle: string): Promise<Inhumado[]> {
+    return await this.inhumadosService.getInhumadosByValle(valle);
+  }
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
@@ -89,35 +113,6 @@ export class InhumadoController {
   })
   async getInhumadoById(@Param('id', ParseUUIDPipe) id: string) {
     return await this.inhumadosService.getInhumadoById(id);
-  }
-
-
-
-
-  @Get('/:nombre/:apellido')
-  @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Obtener un inhumado por nombre y apellido' })
-  @ApiParam({ name: 'nombre', description: 'Nombre del inhumado' })
-  @ApiParam({ name: 'apellido', description: 'Apellido del inhumado' })
-  @ApiResponse({
-    status: 200,
-    description: 'Inhumado encontrado',
-    type: Inhumado,
-  })
-  async getInhumadoByNombreApellido(
-    @Param('nombre') nombre: string,
-    @Param('apellido') apellido: string,
-  ): Promise<Inhumado> {
-    return await this.inhumadosService.getInhumadoByNombreApellido(
-      nombre,
-      apellido,
-    );
-  }
-
-  @Get('valle/:valle')
-  @UseGuards(AuthGuard)
-  async getInhumadosByValle(@Param('valle') valle: string): Promise<Inhumado[]> {
-    return await this.inhumadosService.getInhumadosByValle(valle);
   }
 
   @Put(':id')

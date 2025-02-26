@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from "@nestjs/common";
 import { PublicacionesService } from "./publi.service";
 import { ApiOperation } from "@nestjs/swagger";
 import { AuthGuard } from "../Guards/Jwt/AuthGuards";
@@ -6,6 +6,7 @@ import { Publicacion } from "src/Entities/publicaciones.entity";
 import { Role } from "../Guards/Roles/roles.enum";
 import { Roles } from "../Guards/Roles/roles.decorator";
 import { RolesGuard } from "../Guards/Roles/Roles.guard";
+import { CreatePublicacionDto } from "../DTO/publicacionDto";
 
 
 
@@ -25,10 +26,17 @@ async getPublicacionesByInhumado(@Param('nombreInhumado') nombre: string) {
 @UseGuards(AuthGuard)
 @Post("addPublicacion")
 @ApiOperation({ summary: 'Agregar un publicacion' })
-async addPublicacion(@Body() publicacion: Publicacion): Promise<string>{
-    return await this.publicacionesService.addPublicacion(publicacion)
+async addPublicacion(@Body() publicacionDto: CreatePublicacionDto): Promise<string>{
+    return await this.publicacionesService.addPublicacion(publicacionDto)
   }
 
+@Roles(Role.Admin)
+@UseGuards(AuthGuard, RolesGuard) // Solo admin
+@Put('aprobar/:id')
+@ApiOperation({ summary: 'Aprobar una publicación' })
+async aprobarPublicacion(@Param('id') id: string) {
+    return await this.publicacionesService.aprobarPublicacion(id);
+}
 
 @Roles(Role.Admin)
 @UseGuards(AuthGuard, RolesGuard)
