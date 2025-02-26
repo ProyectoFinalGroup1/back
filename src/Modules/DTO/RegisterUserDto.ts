@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, Validate } from 'class-validator';
+import { IsEmail, IsNotEmpty, Matches, Validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { MatchPassword } from '../Guards/Validates/MatchPassword';
 
@@ -42,6 +42,13 @@ export class RegisterUserDto {
     required: true,
   })
   @IsNotEmpty()
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{5,}$/,
+    {
+      message:
+        'La contraseña debe tener al menos 5 caracteres, una mayúscula, una minúscula, un número y un carácter especial.',
+    },
+  )
   password: string;
 
   @ApiProperty({
