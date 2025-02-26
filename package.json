@@ -38,6 +38,7 @@
     "cloudinary": "^2.5.1",
     "dialogflow": "^1.2.0",
     "dotenv": "^16.4.7",
+    "mercadopago": "^2.3.0",
     "nodemailer": "^6.10.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",

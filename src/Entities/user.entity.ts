@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { ApiProperty } from '@nestjs/swagger';
 import { Publicacion } from './publicaciones.entity';
 import { MensajeAVirgen } from './mensajesVirgen.entity';
+import { Donacion } from './donacion.entity';
 
 @Entity('user')
 export class User {
@@ -62,12 +63,19 @@ export class User {
   @Column({ type: 'boolean', default: false })
   isAdmin?: boolean;
 
+  @OneToMany(() => Donacion, (donacion) => donacion.DonacionUser)
+  donacion: Donacion;
+
   @ApiProperty({
-    description: 'Publicaciones del usario'
+    description: 'Publicaciones del usario',
   })
-  @OneToMany(() => Publicacion, (publicacion) => publicacion.usuario, { cascade: true })
+  @OneToMany(() => Publicacion, (publicacion) => publicacion.usuario, {
+    cascade: true,
+  })
   publicaciones: Publicacion[];
 
-  @OneToMany(() => MensajeAVirgen, (mensaje) => mensaje.usuario, { cascade: true })
+  @OneToMany(() => MensajeAVirgen, (mensaje) => mensaje.usuario, {
+    cascade: true,
+  })
   mensajesAVirgen: MensajeAVirgen[];
 }
