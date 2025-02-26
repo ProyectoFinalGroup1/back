@@ -10,7 +10,7 @@ import { FileUploadModule } from './Modules/file-upload/file-upload.module';
 import { DialogflowModule } from './Modules/chatbot/dialogflow.module';
 import { PublicacionesModule } from './Modules/publicaciones/publi.module';
 import { MensajesVirgenModule } from './Modules/mensajesVirgen/menVir.module';
-
+import { DonacionModule } from './Modules/Donacion/donacion.module';
 
 @Module({
   imports: [
@@ -26,6 +26,7 @@ import { MensajesVirgenModule } from './Modules/mensajesVirgen/menVir.module';
     AuthModule,
     DialogflowModule,
     FileUploadModule,
+    DonacionModule,
 
     TypeOrmModule.forRoot({
       type: 'postgres',
