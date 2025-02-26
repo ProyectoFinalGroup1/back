@@ -52,8 +52,9 @@ export class inhumadosRepository {
     if (!inhumado) {
       throw new NotFoundException('Inhumado no encontrado');
     }
+    const { nombre, apellido } = inhumado;
     await this.inhumadosRepository.remove(inhumado);
-    return inhumado.id;
+    return `eliminado user: ${id} : ${nombre} ${apellido} `;
   }
 
   async seed() {
