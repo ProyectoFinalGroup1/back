@@ -1,7 +1,12 @@
-
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  JoinColumn,
+} from 'typeorm';
 import { User } from './user.entity';
-
 
 @Entity('mensajes_a_la_virgen')
 export class MensajeAVirgen {
@@ -16,9 +21,11 @@ export class MensajeAVirgen {
   texto: string;
 
   @Column({ nullable: true })
-  imagenUrl: string;
+  imagenUrl?: string;
 
   @CreateDateColumn()
   fechaPublicacion: Date;
 
+  @Column({ default: false })
+  estado: boolean;
 }
