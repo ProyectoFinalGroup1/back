@@ -28,4 +28,8 @@ export class MensajesVirgenService {
       throw new NotFoundException('El mensaje a la virgen no encontrada');
     }
   }
+
+  async updateMensajeVirgen(id: string, mensajeVirgen: Partial <MensajeAVirgen>){
+     await this.MensajesVirgenRepository.updateMensajeVirgen(id, mensajeVirgen)
+    }
 }

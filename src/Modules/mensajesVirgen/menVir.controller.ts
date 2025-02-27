@@ -5,8 +5,10 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -56,5 +58,12 @@ export class MensajesVirgenController {
   @ApiOperation({ summary: 'Eliminar una mensajes a la virgen por ID' })
   async deleteMensajeVirgen(@Param('id') id: string) {
     return await this.mensajesVirgenService.deleteMensajeVirgen(id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('editar/:id')
+  @ApiOperation({ summary: 'Editar un mensaje a la virgen' })
+  async updateMensajeVirgen(@Param('id', ParseUUIDPipe) id: string , @Body() mensajeVirgen: Partial <MensajeAVirgen>){
+    return await this.mensajesVirgenService.updateMensajeVirgen(id, mensajeVirgen);
   }
 }

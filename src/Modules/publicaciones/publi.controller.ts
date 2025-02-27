@@ -4,8 +4,10 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { PublicacionesService } from './publi.service';
@@ -15,6 +17,7 @@ import { Role } from '../Guards/Roles/roles.enum';
 import { Roles } from '../Guards/Roles/roles.decorator';
 import { RolesGuard } from '../Guards/Roles/Roles.guard';
 import { CreatePublicacionDto } from '../DTO/publicacionDto';
+import { Publicacion } from 'src/Entities/publicaciones.entity';
 
 @Controller('publicaciones')
 export class PublicacionesController {
@@ -64,4 +67,11 @@ export class PublicacionesController {
   async getPublicacionesByInhumado(@Param('nombreInhumado') nombre: string) {
     return await this.publicacionesService.getPublicacionesByInhumado(nombre);
   }
+
+@UseGuards(AuthGuard)
+@Put('editar/:id')
+@ApiOperation({ summary: 'Editar una publicación' })
+async updatePublicacion(@Param('id', ParseUUIDPipe) id: string , @Body() publicacionDto: Partial <CreatePublicacionDto>){
+  return await this.publicacionesService.updatePublicacion(id, publicacionDto);
+}
 }
