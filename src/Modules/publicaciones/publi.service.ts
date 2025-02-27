@@ -40,5 +40,9 @@ export class PublicacionesService {
   allPublication() {
     return this.publicacionesRepository.allPub();
   }
+
+  async updatePublicacion(id: string, publicacionDto: Partial <CreatePublicacionDto>){
+   await this.publicacionesRepository.updatePublicacion(id, publicacionDto)
+  }
   ///
 }

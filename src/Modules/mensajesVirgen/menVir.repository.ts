@@ -68,4 +68,20 @@ export class MensajesVirgenRepository {
     await this.mensajesVirgenRepository.remove(mensajeVirgen);
     return `eliminado mensaje ${id}`;
   }
+
+  async updateMensajeVirgen(id: string, mensajeVirgen: Partial <MensajeAVirgen>){
+      const menVir = await this.mensajesVirgenRepository.findOneBy({ id });
+      
+      if (!menVir) {
+        throw new NotFoundException('Publicación no encontrada');
+      }
+  
+      if (menVir.estado) {
+        throw new BadRequestException('No se puede editar una publicación aprobada');
+      }
+  
+      await this.mensajesVirgenRepository.update(id, mensajeVirgen)
+      const updatePublicacion = await this.mensajesVirgenRepository.findOneBy({id})
+      return updatePublicacion?.id
+    }
 }
