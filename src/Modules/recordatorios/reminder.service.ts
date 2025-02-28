@@ -1,4 +1,3 @@
-// src/Modules/reminder/reminder.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +5,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/Entities/user.entity';
 import { Inhumado } from 'src/Entities/inhumados.entity';
 import { EmailService } from '../email/email.service';
+import { UsuarioInhumadoService } from '../UsuarioInhumado/usuario-inhumado.service';
 
 @Injectable()
 export class ReminderService {
@@ -17,6 +17,7 @@ export class ReminderService {
     @InjectRepository(Inhumado)
     private inhumadoRepository: Repository<Inhumado>,
     private emailService: EmailService,
+    private usuarioInhumadoService: UsuarioInhumadoService,
   ) {}
 
   // Ejecutar todos los días a las 9:00 AM para recordatorios de 7 días antes
@@ -27,6 +28,7 @@ export class ReminderService {
     // Encontrar aniversarios de fallecimiento en 7 días
     await this.sendDeathAnniversaryReminders(7);
 
+    // Encontrar pagos en 7 días
     await this.sendPaymentReminders(7);
 
     this.logger.log('Finalizado envío de recordatorios semanales');
@@ -40,6 +42,7 @@ export class ReminderService {
     // Encontrar aniversarios de fallecimiento mañana
     await this.sendDeathAnniversaryReminders(1);
 
+    // Encontrar pagos de mañana
     await this.sendPaymentReminders(1);
 
     this.logger.log('Finalizado envío de recordatorios diarios');
@@ -56,7 +59,9 @@ export class ReminderService {
       const targetDay = targetDate.getDate();
 
       // Buscar todos los inhumados
-      const allInhumados = await this.inhumadoRepository.find();
+      const allInhumados = await this.inhumadoRepository.find({
+        relations: ['usuario'],
+      });
 
       // Filtrar inhumados cuyo aniversario de fallecimiento sea en la fecha objetivo
       const inhumadosWithAnniversary = allInhumados.filter((inhumado) => {
@@ -98,16 +103,20 @@ export class ReminderService {
 
       // Para cada inhumado con aniversario, enviar notificación a usuarios activos
       if (inhumadosWithAnniversary.length > 0) {
-        const allUsers = await this.userRepository.find();
-        // En el futuro, cuando se implemente la relación usuario-inhumado, se filtrará adecuadamente*******
         for (const inhumado of inhumadosWithAnniversary) {
+          // Obtener usuarios asociados a este inhumado
+          const usuariosAsociados =
+            await this.usuarioInhumadoService.obtenerUsuariosPorInhumado(
+              inhumado.id,
+            );
+
           // Extraer el año de fallecimiento para calcular aniversario
           const ffal_parts = inhumado.ffal.split(' de ');
           const yearOfDeath = parseInt(ffal_parts[2], 10);
           const anniversaryYears = new Date().getFullYear() - yearOfDeath;
 
           // Filtrar solo usuarios que desean recibir recordatorios
-          const usersWhoWantReminders = allUsers.filter(
+          const usersWhoWantReminders = usuariosAsociados.filter(
             (user) => user.recibirRecordatoriosAniversarios !== false,
           );
 
@@ -131,50 +140,6 @@ export class ReminderService {
     }
   }
 
-  // Método para enviar recordatorios de fecha de pago
-  // private async sendPaymentReminders(daysAhead: number) {
-  //   try {
-  //     // Calcular la fecha objetivo (hoy + días especificados)
-  //     const targetDate = new Date();
-  //     targetDate.setDate(targetDate.getDate() + daysAhead);
-
-  //     // Formato para comparar solo año, mes y día
-  //     const formattedTargetDate = targetDate.toISOString().split('T')[0];
-
-  //     // Buscar usuarios con fecha de pago en la fecha objetivo
-  //     const usersWithPaymentDue = await this.userRepository
-  //       .createQueryBuilder('user')
-  //       .where(`TO_CHAR(user.fechaPago, 'YYYY-MM-DD') = :formattedDate`, {
-  //         formattedDate: formattedTargetDate,
-  //       })
-  //       .getMany();
-
-  //     this.logger.log(
-  //       `Encontrados ${usersWithPaymentDue.length} pagos pendientes para dentro de ${daysAhead} días`,
-  //     );
-
-  //     // Enviar recordatorio a cada usuario
-  //     for (const user of usersWithPaymentDue) {
-  //       // Asegurar que fechaPago sea un objeto Date
-  //       const fechaPago =
-  //         user.fechaPago instanceof Date
-  //           ? user.fechaPago
-  //           : new Date(user.fechaPago);
-
-  //       await this.emailService.sendPaymentReminderEmail(
-  //         user.email,
-  //         user.nombre,
-  //         fechaPago,
-  //         daysAhead,
-  //       );
-  //     }
-  //   } catch (error) {
-  //     this.logger.error(
-  //       `Error al enviar recordatorios de pago: ${error.message}`,
-  //       error.stack,
-  //     );
-  //   }
-  // }
   private async sendPaymentReminders(daysAhead: number) {
     try {
       // Calcular la fecha objetivo (hoy + días especificados)

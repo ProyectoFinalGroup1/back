@@ -12,6 +12,7 @@ import { PublicacionesModule } from './Modules/publicaciones/publi.module';
 import { MensajesVirgenModule } from './Modules/mensajesVirgen/menVir.module';
 import { DonacionModule } from './Modules/Donacion/donacion.module';
 import { ReminderModule } from './Modules/recordatorios/reminder.module';
+import { UsuarioInhumadoModule } from './Modules/UsuarioInhumado/usuario-inhumado.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ReminderModule } from './Modules/recordatorios/reminder.module';
     FileUploadModule,
     DonacionModule,
     ReminderModule,
+    UsuarioInhumadoModule,
 
     TypeOrmModule.forRoot({
       type: 'postgres',

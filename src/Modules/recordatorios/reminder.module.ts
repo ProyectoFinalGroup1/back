@@ -6,9 +6,14 @@ import { EmailModule } from '../email/email.module';
 import { User } from 'src/Entities/user.entity';
 import { Inhumado } from 'src/Entities/inhumados.entity';
 import { ReminderController } from './remider.controller';
+import { UsuarioInhumadoModule } from '../UsuarioInhumado/usuario-inhumado.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Inhumado]), EmailModule],
+  imports: [
+    TypeOrmModule.forFeature([User, Inhumado]),
+    EmailModule,
+    UsuarioInhumadoModule,
+  ],
   controllers: [ReminderController],
   providers: [ReminderService],
   exports: [ReminderService],

@@ -9,6 +9,7 @@ import {
   Param,
   ParseFilePipe,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
   UploadedFile,
@@ -28,8 +29,12 @@ import { Roles } from '../Guards/Roles/roles.decorator';
 import { Role } from '../Guards/Roles/roles.enum';
 import { AuthGuard } from '../Guards/Jwt/AuthGuards';
 import { RolesGuard } from '../Guards/Roles/Roles.guard';
+
+import { AsignarUsuarioDto } from './asignar-usuario.dto';
+
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateInhumadoDto } from '../DTO/createInhumadoDto';
+
 
 @ApiTags('Inhumados')
 @ApiBearerAuth()
@@ -195,5 +200,29 @@ export class InhumadoController {
   })
   async deleteInhumado(@Param('id', ParseUUIDPipe) id: string) {
     return await this.inhumadosService.deleteInhumado(id);
+  }
+  //ASIGNAR USUARIO A INHUMADO
+  @Patch(':id/asignar-usuario')
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @ApiOperation({ summary: 'Asignar un usuario a un inhumado' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'ID del inhumado (UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario asignado exitosamente',
+    type: Inhumado,
+  })
+  async asignarUsuario(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() asignarUsuarioDto: AsignarUsuarioDto,
+  ) {
+    return await this.inhumadosService.asignarUsuario(
+      id,
+      asignarUsuarioDto.usuarioId,
+    );
   }
 }
