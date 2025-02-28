@@ -1,14 +1,20 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   ParseUUIDPipe,
   Patch,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PublicacionesService } from './publi.service';
 import { ApiOperation } from '@nestjs/swagger';
@@ -17,7 +23,7 @@ import { Role } from '../Guards/Roles/roles.enum';
 import { Roles } from '../Guards/Roles/roles.decorator';
 import { RolesGuard } from '../Guards/Roles/Roles.guard';
 import { CreatePublicacionDto } from '../DTO/publicacionDto';
-import { Publicacion } from 'src/Entities/publicaciones.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('publicaciones')
 export class PublicacionesController {
@@ -38,11 +44,40 @@ export class PublicacionesController {
 
   @UseGuards(AuthGuard)
   @Post('addPublicacion')
+  @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Agregar un publicacion' })
   async addPublicacion(
-    @Body() publicacionDto: CreatePublicacionDto,
-  ): Promise<string> {
-    return await this.publicacionesService.addPublicacion(publicacionDto);
+    @UploadedFile(
+      //=>Cloudinary parametros que requirer
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 200000000,
+            message: 'El tamaño de la imagen debe ser inferior a 200MB',
+          }),
+          new FileTypeValidator({
+            fileType: /^(image\/jpeg|image\/png)$/,
+          }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Body()
+    publicacionDto: CreatePublicacionDto,
+  ) {
+    try {
+      const ImgCloudinary = await this.publicacionesService.uploadImage(file);
+      const newPublicacion = await this.publicacionesService.addPublicacion(
+        publicacionDto,
+        ImgCloudinary,
+      );
+      return {
+        message: 'Publicacion creada con exito a la espera de su aprobacion',
+        newPublicacion,
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   @Roles(Role.Admin)
@@ -68,10 +103,16 @@ export class PublicacionesController {
     return await this.publicacionesService.getPublicacionesByInhumado(nombre);
   }
 
-@UseGuards(AuthGuard)
-@Put('editar/:id')
-@ApiOperation({ summary: 'Editar una publicación' })
-async updatePublicacion(@Param('id', ParseUUIDPipe) id: string , @Body() publicacionDto: Partial <CreatePublicacionDto>){
-  return await this.publicacionesService.updatePublicacion(id, publicacionDto);
-}
+  @UseGuards(AuthGuard)
+  @Put('editar/:id')
+  @ApiOperation({ summary: 'Editar una publicación' })
+  async updatePublicacion(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() publicacionDto: Partial<CreatePublicacionDto>,
+  ) {
+    return await this.publicacionesService.updatePublicacion(
+      id,
+      publicacionDto,
+    );
+  }
 }

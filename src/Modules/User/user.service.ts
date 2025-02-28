@@ -31,12 +31,10 @@ export class userService {
     return allUsers;
   }
 
-  async userFind(id: string): Promise<User> {
-    const findUser = await this.userRepository.findOneBy({ idUser: id });
-    if (!findUser) {
-      throw new NotFoundException('No se encontro el usuario');
-    }
-    return findUser;
+  async userFind(id: string): Promise<User | NotFoundException> {
+    const result = await this.userRepository.findOne({ where: { idUser: id } });
+    if (!result) throw new NotFoundException('No se encontro usuario');
+    return result;
   }
 
   async updateUser(idUser: string, dataUser: Partial<User>): Promise<User> {

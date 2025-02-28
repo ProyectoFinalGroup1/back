@@ -15,13 +15,24 @@ export class MensajesVirgenService {
   async filterMSsjs() {
     return this.MensajesVirgenRepository.filterMSsjs();
   }
-  addMensajeVirgen(mensajeVirgen: Partial<MensajeAVirgen>) {
-    return this.MensajesVirgenRepository.addMensajeVirgen(mensajeVirgen);
+
+  async uploadImage(file: Express.Multer.File) {
+    return await this.MensajesVirgenRepository.uploadImage(file);
+  }
+  addMensajeVirgen(
+    mensajeVirgen: Partial<MensajeAVirgen>,
+    imgCloudinary: string,
+  ) {
+    return this.MensajesVirgenRepository.addMensajeVirgen(
+      mensajeVirgen,
+      imgCloudinary,
+    );
   }
 
   aprobado(id) {
     return this.MensajesVirgenRepository.aprobado(id);
   }
+
   async deleteMensajeVirgen(id: string): Promise<void> {
     const result = await this.MensajesVirgenRepository.deleteMensajeVirgen(id);
     if (!result) {
@@ -29,7 +40,10 @@ export class MensajesVirgenService {
     }
   }
 
-  async updateMensajeVirgen(id: string, mensajeVirgen: Partial <MensajeAVirgen>){
-     await this.MensajesVirgenRepository.updateMensajeVirgen(id, mensajeVirgen)
-    }
+  async updateMensajeVirgen(
+    id: string,
+    mensajeVirgen: Partial<MensajeAVirgen>,
+  ) {
+    await this.MensajesVirgenRepository.updateMensajeVirgen(id, mensajeVirgen);
+  }
 }
