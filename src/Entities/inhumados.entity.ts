@@ -1,6 +1,14 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Publicacion } from './publicaciones.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from './user.entity';
+import { UsuarioInhumado } from './usuario-inhumado.entity';
 
 @Entity('inhumados')
 export class Inhumado {
@@ -92,4 +100,20 @@ export class Inhumado {
     onDelete: 'CASCADE',
   })
   publicaciones: Publicacion[];
+
+  //agregar una referencia al usuario en la entidad Inhumado
+  @ApiProperty({
+    description: 'Usuario asociado al inhumado',
+    required: false,
+  })
+  @OneToMany(
+    () => UsuarioInhumado,
+    (usuarioInhumado) => usuarioInhumado.inhumado,
+  )
+  usuarioInhumados: UsuarioInhumado[];
+  @JoinColumn({ name: 'usuario_id' })
+  usuario: User;
+
+  @Column({ nullable: true })
+  usuario_id: string;
 }

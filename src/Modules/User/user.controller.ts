@@ -51,7 +51,7 @@ export class UserController {
   })
   @UseGuards(AuthGuard)
   @Get(':id')
-  async userById(id: string): Promise<User> {
+  async userById(@Param('id') id: string) {
     return await this.userService.userFind(id);
   }
 

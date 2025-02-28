@@ -27,10 +27,9 @@ export class inhumadosRepository {
   }
 
   async getInhumadoById(id) {
-
     const inhumado = await this.inhumadosRepository.findOne({
       where: { id },
-      relations: ['publicaciones'],
+      relations: ['publicaciones', 'usuario'],
     });
     if (!inhumado)
       throw new NotFoundException('No se encontro inhumado por el ID');
@@ -38,7 +37,6 @@ export class inhumadosRepository {
       (pub) => pub.aprobada === true,
     );
     return inhumado;
-
   }
 
   async getInhumadoByNombreApellido(nombre: string, apellido: string) {
@@ -66,7 +64,6 @@ export class inhumadosRepository {
 
     await this.inhumadosRepository.remove(inhumado);
     return id;
-
   }
 
   async seed() {
@@ -90,5 +87,34 @@ export class inhumadosRepository {
     });
     await this.inhumadosRepository.save(precarga);
     return { message: 'Seeder ejecutado con exito' };
+  }
+  //ASIGNAR USUARIO A INHUMADO
+  async asignarUsuario(id: string, usuarioId: string) {
+    // Verificar que el inhumado existe
+    const inhumado = await this.inhumadosRepository.findOne({
+      where: { id },
+      relations: ['publicaciones'],
+    });
+
+    if (!inhumado) {
+      throw new NotFoundException('Inhumado no encontrado');
+    }
+
+    // Actualizar solo el campo usuario_id usando QueryBuilder
+    // Esto evita problemas con relaciones one-to-many
+    await this.inhumadosRepository
+      .createQueryBuilder()
+      .update()
+      .set({ usuario_id: usuarioId })
+      .where('id = :id', { id })
+      .execute();
+
+    // Obtener el inhumado actualizado
+    const updatedInhumado = await this.inhumadosRepository.findOne({
+      where: { id },
+      relations: ['publicaciones', 'usuario'],
+    });
+
+    return updatedInhumado;
   }
 }

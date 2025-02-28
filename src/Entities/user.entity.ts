@@ -4,6 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Publicacion } from './publicaciones.entity';
 import { MensajeAVirgen } from './mensajesVirgen.entity';
 import { Donacion } from './donacion.entity';
+import { UsuarioInhumado } from './usuario-inhumado.entity';
 
 @Entity('user')
 export class User {
@@ -92,8 +93,20 @@ export class User {
   })
   publicaciones: Publicacion[];
 
+  @ApiProperty({
+    description: 'Mensajes a la virgen del usuario',
+  })
   @OneToMany(() => MensajeAVirgen, (mensaje) => mensaje.usuario, {
     cascade: true,
   })
   mensajesAVirgen: MensajeAVirgen[];
+
+  @ApiProperty({
+    description: 'Inhumados asociados al usuario',
+  })
+  @OneToMany(
+    () => UsuarioInhumado,
+    (usuarioInhumado) => usuarioInhumado.usuario,
+  )
+  usuarioInhumados: UsuarioInhumado[];
 }

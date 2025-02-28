@@ -24,7 +24,6 @@ export class inhumadosService {
       throw new NotFoundException('Inhumado no existente');
     }
     return inhumado;
-
   }
 
   async getInhumadoByNombreApellido(
@@ -51,5 +50,9 @@ export class inhumadosService {
 
   deleteInhumado(id: string): Promise<string> {
     return this.InhumadosRepository.deleteInhumado(id);
+  }
+  //ASIGNAR USUARIO A INHUMADO
+  async asignarUsuario(id: string, usuarioId: string) {
+    return await this.InhumadosRepository.asignarUsuario(id, usuarioId);
   }
 }
