@@ -2,11 +2,18 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
+  ParseUUIDPipe,
   Patch,
+  Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { User } from 'src/Entities/user.entity';
 import { userService } from './user.service';
@@ -22,6 +29,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UpdateUserPreferencesDto } from '../DTO/UpdateUserPreferencesDto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -104,4 +112,29 @@ export class UserController {
   async deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }
+
+
+  @ApiOperation({ summary: 'Subir imagen de perfil para user' })
+  @ApiBearerAuth()
+  @Post('uploadImmagenPerfil/:userId')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImgPerfil(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 2000000,
+            message: 'El tamaño de la imagen debe ser inferior a 2MB',
+          }),
+          new FileTypeValidator({
+            fileType: /^(image\/jpeg|image\/png)$/,
+          }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.userService.uploadImgPerfil(file,userId);
+}
 }

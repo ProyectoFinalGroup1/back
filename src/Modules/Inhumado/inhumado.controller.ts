@@ -1,14 +1,20 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   ParseUUIDPipe,
   Patch,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { inhumadosService } from './inhumado.service';
 import { Inhumado } from 'src/Entities/inhumados.entity';
@@ -23,7 +29,12 @@ import { Roles } from '../Guards/Roles/roles.decorator';
 import { Role } from '../Guards/Roles/roles.enum';
 import { AuthGuard } from '../Guards/Jwt/AuthGuards';
 import { RolesGuard } from '../Guards/Roles/Roles.guard';
+
 import { AsignarUsuarioDto } from './asignar-usuario.dto';
+
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateInhumadoDto } from '../DTO/createInhumadoDto';
+
 
 @ApiTags('Inhumados')
 @ApiBearerAuth()
@@ -56,15 +67,43 @@ export class InhumadoController {
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
-  @Post('addInhumado')
   @ApiOperation({ summary: 'Agregar un inhumados' })
   @ApiResponse({
     status: 200,
     description: 'Lista de inhumados obtenida exitosamente',
     type: [Inhumado],
   })
-  async addInhumado(@Body() inhumado: Inhumado) {
-    return await this.inhumadosService.addInhumado(inhumado);
+  @Post('addInhumado')
+  @UseInterceptors(FileInterceptor('file'))
+  async addInhumado(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 200000000,
+            message: 'El tamaño de la imagen debe ser inferior a 200MB',
+          }),
+          new FileTypeValidator({
+            fileType: /^(image\/jpeg|image\/png)$/,
+          }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Body()
+    inhumado: CreateInhumadoDto,
+  ) {
+    //=> FORMULARIOO PARA INGRESAR UN NUEVO INHUMAD
+    try {
+      const ImgCloudinary = await this.inhumadosService.uploadImage(file); //=> SUBE LA FOTO A CLOUDINARY Y DEVUELEV EL URL DE LA NUBE
+      const newInhumado = await this.inhumadosService.addInhumado(
+        inhumado, //=>CREAE AL USUARIO CON TODOS LOS DATOS INCLUYENDO LA URL
+        ImgCloudinary,
+      );
+      return { message: 'Inhumado creado con exito: ', newInhumado };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   @Get('/:nombre/:apellido')

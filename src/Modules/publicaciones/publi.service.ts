@@ -20,8 +20,18 @@ export class PublicacionesService {
     return publicaciones;
   }
 
-  async addPublicacion(publicacionDto: CreatePublicacionDto): Promise<string> {
-    return await this.publicacionesRepository.addPublicacion(publicacionDto);
+  async uploadImage(file: Express.Multer.File) {
+    return await this.publicacionesRepository.uploadImage(file);
+  }
+
+  async addPublicacion(
+    publicacionDto: CreatePublicacionDto,
+    ImgCloudinary: string,
+  ): Promise<string> {
+    return await this.publicacionesRepository.addPublicacion(
+      publicacionDto,
+      ImgCloudinary,
+    );
   }
 
   aprobarPublicacion(id: string) {
@@ -41,8 +51,11 @@ export class PublicacionesService {
     return this.publicacionesRepository.allPub();
   }
 
-  async updatePublicacion(id: string, publicacionDto: Partial <CreatePublicacionDto>){
-   await this.publicacionesRepository.updatePublicacion(id, publicacionDto)
+  async updatePublicacion(
+    id: string,
+    publicacionDto: Partial<CreatePublicacionDto>,
+  ) {
+    await this.publicacionesRepository.updatePublicacion(id, publicacionDto);
   }
   ///
 }

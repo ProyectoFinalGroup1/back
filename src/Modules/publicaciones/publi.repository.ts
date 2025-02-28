@@ -9,6 +9,7 @@ import { Publicacion } from 'src/Entities/publicaciones.entity';
 import { Inhumado } from 'src/Entities/inhumados.entity';
 import { User } from 'src/Entities/user.entity';
 import { CreatePublicacionDto } from '../DTO/publicacionDto';
+import { v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
 export class PublicacionesRepository {
@@ -18,7 +19,13 @@ export class PublicacionesRepository {
     @InjectRepository(Inhumado)
     private inhumadosRepository: Repository<Inhumado>,
     @InjectRepository(User) private userRepository: Repository<User>,
-  ) {}
+  ) {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+  }
 
   async getPublicacionesByInhumado(nombre: string): Promise<Publicacion[]> {
     const publicaciones = await this.publicacionesRepository.find({
@@ -38,9 +45,31 @@ export class PublicacionesRepository {
     return publicaciones;
   }
 
-  async addPublicacion(publicacionDto): Promise<string> {
-    const { usuarioId, inhumadoId, mensaje, imagen } = publicacionDto;
+  async uploadImage(file: Express.Multer.File): Promise<string> {
+    if (!file || !file.buffer) {
+      throw new BadRequestException('El archivo no tiene contenido válido');
+    }
+    return new Promise<string>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream({ folder: 'publicaciones' }, (error, result) => {
+          if (error) return reject(new Error(error.message));
+          if (!result)
+            return reject(new Error('Hubo un error en la respuesta'));
+          resolve(result.secure_url);
+        })
+        .end(file.buffer);
+    });
+  }
 
+  async addPublicacion(
+    publicacionDto: { usuarioId: string; inhumadoId: string; mensaje: string },
+    ImgCloudinary,
+  ): Promise<string> {
+    const { usuarioId, inhumadoId, mensaje } = publicacionDto;
+
+    if (!mensaje || mensaje.trim() === '') {
+      throw new BadRequestException('El mensaje no puede estar vacío');
+    }
     const existingUser = await this.userRepository.findOne({
       where: { idUser: usuarioId },
     });
@@ -60,7 +89,7 @@ export class PublicacionesRepository {
     nuevaPublicacion.usuario = existingUser;
     nuevaPublicacion.inhumado = existingInhumado;
     nuevaPublicacion.mensaje = mensaje;
-    nuevaPublicacion.imagen = imagen ? imagen : null;
+    nuevaPublicacion.imagen = ImgCloudinary || null;
     nuevaPublicacion.aprobada = false;
     nuevaPublicacion.fechaPublicacion = new Date();
     const savePublicacion =
@@ -117,19 +146,26 @@ export class PublicacionesRepository {
     };
   }
 
-  async updatePublicacion(id: string, publicacionDto: Partial <CreatePublicacionDto>){
+  async updatePublicacion(
+    id: string,
+    publicacionDto: Partial<CreatePublicacionDto>,
+  ) {
     const publicacion = await this.publicacionesRepository.findOneBy({ id });
-    
+
     if (!publicacion) {
       throw new NotFoundException('Publicación no encontrada');
     }
 
     if (publicacion.aprobada) {
-      throw new BadRequestException('No se puede editar una publicación aprobada');
+      throw new BadRequestException(
+        'No se puede editar una publicación aprobada',
+      );
     }
 
-    await this.publicacionesRepository.update(id, publicacionDto)
-    const updatePublicacion = await this.publicacionesRepository.findOneBy({id})
-    return updatePublicacion?.id
+    await this.publicacionesRepository.update(id, publicacionDto);
+    const updatePublicacion = await this.publicacionesRepository.findOneBy({
+      id,
+    });
+    return updatePublicacion?.id;
   }
 }

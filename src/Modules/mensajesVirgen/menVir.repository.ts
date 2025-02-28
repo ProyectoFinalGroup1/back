@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MensajeAVirgen } from 'src/Entities/mensajesVirgen.entity';
 import { User } from 'src/Entities/user.entity';
 import { Repository } from 'typeorm';
+import { v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
 export class MensajesVirgenRepository {
@@ -14,7 +15,13 @@ export class MensajesVirgenRepository {
     @InjectRepository(MensajeAVirgen)
     private mensajesVirgenRepository: Repository<MensajeAVirgen>,
     @InjectRepository(User) private userRepository: Repository<User>,
-  ) {}
+  ) {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+  }
 
   async getMensajesVirgen(): Promise<MensajeAVirgen[]> {
     return this.mensajesVirgenRepository.find();
@@ -30,8 +37,28 @@ export class MensajesVirgenRepository {
       Pendientes: pendientes,
     };
   }
-  async addMensajeVirgen(mensajeVirgen: Partial<MensajeAVirgen>) {
-    const { usuario, texto, imagenUrl } = mensajeVirgen;
+
+  async uploadImage(file: Express.Multer.File): Promise<string> {
+    if (!file || !file.buffer) {
+      throw new BadRequestException('El archivo no tiene contenido válido');
+    }
+    return new Promise<string>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream({ folder: 'mensajesAVirgen' }, (error, result) => {
+          if (error) return reject(new Error(error.message));
+          if (!result)
+            return reject(new Error('Hubo un error en la respuesta'));
+          resolve(result.secure_url);
+        })
+        .end(file.buffer);
+    });
+  }
+
+  async addMensajeVirgen(
+    mensajeVirgen: Partial<MensajeAVirgen>,
+    imgCloudinary: string,
+  ) {
+    const { usuario, texto } = mensajeVirgen;
     const existingUser = await this.userRepository.findOne({
       where: { idUser: usuario?.idUser },
     });
@@ -41,7 +68,7 @@ export class MensajesVirgenRepository {
     newMSJ.usuario = existingUser;
     newMSJ.texto = texto;
     newMSJ.fechaPublicacion = new Date();
-    newMSJ.imagenUrl = imagenUrl ?? undefined;
+    newMSJ.imagenUrl = imgCloudinary;
     newMSJ.estado = false;
     const result = await this.mensajesVirgenRepository.save(newMSJ);
     return result.id;
@@ -69,19 +96,26 @@ export class MensajesVirgenRepository {
     return `eliminado mensaje ${id}`;
   }
 
-  async updateMensajeVirgen(id: string, mensajeVirgen: Partial <MensajeAVirgen>){
-      const menVir = await this.mensajesVirgenRepository.findOneBy({ id });
-      
-      if (!menVir) {
-        throw new NotFoundException('Publicación no encontrada');
-      }
-  
-      if (menVir.estado) {
-        throw new BadRequestException('No se puede editar una publicación aprobada');
-      }
-  
-      await this.mensajesVirgenRepository.update(id, mensajeVirgen)
-      const updatePublicacion = await this.mensajesVirgenRepository.findOneBy({id})
-      return updatePublicacion?.id
+  async updateMensajeVirgen(
+    id: string,
+    mensajeVirgen: Partial<MensajeAVirgen>,
+  ) {
+    const menVir = await this.mensajesVirgenRepository.findOneBy({ id });
+
+    if (!menVir) {
+      throw new NotFoundException('Publicación no encontrada');
     }
+
+    if (menVir.estado) {
+      throw new BadRequestException(
+        'No se puede editar una publicación aprobada',
+      );
+    }
+
+    await this.mensajesVirgenRepository.update(id, mensajeVirgen);
+    const updatePublicacion = await this.mensajesVirgenRepository.findOneBy({
+      id,
+    });
+    return updatePublicacion?.id;
+  }
 }
