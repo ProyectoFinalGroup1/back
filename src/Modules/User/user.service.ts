@@ -7,6 +7,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/Entities/user.entity';
 import { Repository } from 'typeorm';
 import { UpdateUserPreferencesDto } from '../DTO/UpdateUserPreferencesDto';
+import {
+  v2 as cloudinary,
+  UploadApiErrorResponse,
+  UploadApiResponse,
+} from 'cloudinary';
+interface CloudinaryResponse {
+  secure_url: string;
+  public_id: string;
+}
 
 @Injectable()
 export class userService {
@@ -76,4 +85,67 @@ export class userService {
 
     return await this.userRepository.save(findUser);
   }
+
+
+  async uploadImgPerfil(
+    file: Express.Multer.File,
+    userId: string,
+  ): Promise<{ imageUrl: string }> {
+    // Verificar si el archivo es válido
+    if (!file || !file.buffer) {
+      throw new BadRequestException(
+        'No se ha proporcionado un archivo válido.',
+      );
+    }
+
+    // Buscar el user en la base de datos
+    const user = await this.userRepository.findOneBy({
+      idUser: userId,
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+       `User con ID ${userId} no encontrado`,
+      );
+    }
+
+    // Subir la imagen a Cloudinary
+    let result: CloudinaryResponse;
+    try {
+      result = await new Promise<CloudinaryResponse>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'users',
+          },
+          (
+            error: UploadApiErrorResponse | undefined,
+            result: UploadApiResponse,
+          ) => {
+            if (error) return reject(new Error(error.message));
+            resolve(result);
+          },
+        );
+
+        const buffer = Buffer.from(file.buffer);
+        uploadStream.end(buffer);
+      });
+    } catch (error) {
+      throw new Error(
+        `Error al subir la imagen: ${error instanceof Error ? error.message : 'Error desconocido'},
+      `);
+    }
+
+    // Verificar que la respuesta de Cloudinary contenga los campos esperados
+    if (!result.secure_url || !result.public_id) {
+      throw new Error(
+        'La respuesta de Cloudinary no contiene la información esperada.',
+      );
+    }
+
+    // Guardar la URL de la imagen en el inhumado
+    user.imagenUrl = result.secure_url;
+    await this.userRepository.save(user);
+
+    return { imageUrl: result.secure_url };
+  }
 }

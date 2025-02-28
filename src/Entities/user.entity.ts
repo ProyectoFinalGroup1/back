@@ -46,6 +46,13 @@ export class User {
   })
   @Column({ type: 'varchar', length: 50, nullable: false, unique: true })
   email: string;
+  
+  @ApiProperty({
+    description: 'URL de la imagen del inhumado',
+    example: 'https://example.com/image.jpg',
+  })
+  @Column({ nullable: true })
+  imagenUrl: string;
 
   //SE AGREGA OPCION DE RECIBIR FECHA DE PAGO
   @ApiProperty({
