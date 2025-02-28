@@ -47,6 +47,24 @@ export class User {
   @Column({ type: 'varchar', length: 50, nullable: false, unique: true })
   email: string;
 
+  //SE AGREGA OPCION DE RECIBIR FECHA DE PAGO
+  @ApiProperty({
+    description: 'Fecha de próximo pago',
+    example: '2025-03-15',
+    required: false,
+  })
+  @Column({ type: 'date', nullable: true })
+  fechaPago: Date;
+
+  //SE AGREGA OPCION DE RECIBIR RECORDATORIOS DE FECHAS ESPECIALES
+  @ApiProperty({
+    description: 'Preferencia para recibir recordatorios de aniversarios',
+    example: true,
+    default: true,
+  })
+  @Column({ type: 'boolean', default: true })
+  recibirRecordatoriosAniversarios: boolean;
+
   @ApiProperty({
     description: 'Contraseña del usuario',
     example: '********',

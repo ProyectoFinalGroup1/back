@@ -39,7 +39,7 @@ export class DonacionController {
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
-  @Get()
+  @Get('ALLdonaciones')
   @ApiOperation({ summary: 'Obtener todas las donaciones' }) // Descripción del endpoint
   @ApiResponse({
     status: 200,

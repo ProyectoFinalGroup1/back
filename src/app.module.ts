@@ -11,6 +11,7 @@ import { DialogflowModule } from './Modules/chatbot/dialogflow.module';
 import { PublicacionesModule } from './Modules/publicaciones/publi.module';
 import { MensajesVirgenModule } from './Modules/mensajesVirgen/menVir.module';
 import { DonacionModule } from './Modules/Donacion/donacion.module';
+import { ReminderModule } from './Modules/recordatorios/reminder.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { DonacionModule } from './Modules/Donacion/donacion.module';
     DialogflowModule,
     FileUploadModule,
     DonacionModule,
+    ReminderModule,
 
     TypeOrmModule.forRoot({
       type: 'postgres',

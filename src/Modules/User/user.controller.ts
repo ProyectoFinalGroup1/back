@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Put,
   UseGuards,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { UpdateUserPreferencesDto } from '../DTO/UpdateUserPreferencesDto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -27,7 +29,7 @@ import {
 export class UserController {
   constructor(private readonly userService: userService) {}
 
-  @ApiOperation({ summary: 'Obtener todos los usuarios' }) // 3. Describe la operación
+  @ApiOperation({ summary: 'Obtener todos los usuarios' })
   @ApiResponse({
     status: 200,
     description: 'Lista de usuarios obtenida exitosamente',
@@ -51,6 +53,18 @@ export class UserController {
   @Get(':id')
   async userById(id: string): Promise<User> {
     return await this.userService.userFind(id);
+  }
+
+  @Patch(':id/preferences')
+  @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary: 'Actualizar preferencias de notificaciones del usuario',
+  })
+  async updatePreferences(
+    @Param('id') idUser: string,
+    @Body() preferencesDto: UpdateUserPreferencesDto,
+  ) {
+    return await this.userService.updatePreferences(idUser, preferencesDto);
   }
 
   @ApiOperation({ summary: 'Actualizar usuario' })
