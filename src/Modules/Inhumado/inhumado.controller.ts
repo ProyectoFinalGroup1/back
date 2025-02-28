@@ -30,7 +30,7 @@ export class InhumadoController {
   constructor(private readonly inhumadosService: inhumadosService) {}
 
   @Roles(Role.Admin)
-  // @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Get('seeder')
   @ApiOperation({ summary: 'Obtener seeder :D' })
   async seed() {
@@ -38,8 +38,8 @@ export class InhumadoController {
     return { message: 'sedder exitoso' }; //borrar
   }
 
-  // @Roles(Role.Admin)
-  // @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
   @Get()
   @ApiOperation({ summary: 'Obtener lista de todos los inhumados' })
   @ApiResponse({
@@ -51,8 +51,6 @@ export class InhumadoController {
     const datos = await this.inhumadosService.allInhumados();
     return datos;
   }
-
-
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
@@ -67,7 +65,7 @@ export class InhumadoController {
     return await this.inhumadosService.addInhumado(inhumado);
   }
 
-  @Get('nombre&apellido/:nombre/:apellido')
+  @Get('/:nombre/:apellido')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Obtener un inhumado por nombre y apellido' })
   @ApiParam({ name: 'nombre', description: 'Nombre del inhumado' })
@@ -88,8 +86,10 @@ export class InhumadoController {
   }
 
   @Get('valle/:valle')
-  //@UseGuards(AuthGuard)
-  async getInhumadosByValle(@Param('valle') valle: string): Promise<Inhumado[]> {
+  @UseGuards(AuthGuard)
+  async getInhumadosByValle(
+    @Param('valle') valle: string,
+  ): Promise<Inhumado[]> {
     return await this.inhumadosService.getInhumadosByValle(valle);
   }
 
@@ -135,8 +135,6 @@ export class InhumadoController {
   ) {
     return await this.inhumadosService.updateInhumado(id, inhumado);
   }
-
-
 
   @Delete(':id')
   @Roles(Role.Admin)

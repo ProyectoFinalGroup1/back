@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Publicacion } from 'src/Entities/publicaciones.entity';
 import { Inhumado } from 'src/Entities/inhumados.entity';
 import { User } from 'src/Entities/user.entity';
+import { CreatePublicacionDto } from '../DTO/publicacionDto';
 
 @Injectable()
 export class PublicacionesRepository {
@@ -11,43 +16,70 @@ export class PublicacionesRepository {
     @InjectRepository(Publicacion)
     private publicacionesRepository: Repository<Publicacion>,
     @InjectRepository(Inhumado)
-    private inhumadosRepository: Repository<Inhumado>
+    private inhumadosRepository: Repository<Inhumado>,
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
-  
+
   async getPublicacionesByInhumado(nombre: string): Promise<Publicacion[]> {
     const publicaciones = await this.publicacionesRepository.find({
-        where: {
-            inhumado: { nombre },
-            aprobada: true, // Solo publicaciones aprobadas
-        },
-        relations: ['inhumado', 'usuario'],
+      where: {
+        inhumado: { nombre },
+        aprobada: true, // Solo publicaciones aprobadas
+      },
+      relations: ['inhumado', 'usuario'],
     });
 
     if (!publicaciones.length) {
-        throw new NotFoundException('No se encontró el inhumado con ese nombre o no tiene publicaciones aprobadas');
+      throw new NotFoundException(
+        'No se encontró el inhumado con ese nombre o no tiene publicaciones aprobadas',
+      );
     }
 
     return publicaciones;
-}
-
-async addPublicacion(publicacion: Partial<Publicacion>): Promise<string> {
-  if (!publicacion) {
-    throw new Error('Publicacion is undefined');
   }
-  const nuevaPublicacion = await this.publicacionesRepository.save(publicacion);
-  return nuevaPublicacion.id
-}
+
+  async addPublicacion(publicacionDto): Promise<string> {
+    const { usuarioId, inhumadoId, mensaje, imagen } = publicacionDto;
+
+    const existingUser = await this.userRepository.findOne({
+      where: { idUser: usuarioId },
+    });
+    if (!existingUser) {
+      throw new NotFoundException('No se encontro usuario');
+    }
+    const existingInhumado = await this.inhumadosRepository.findOne({
+      where: { id: inhumadoId },
+    });
+    if (!existingInhumado) {
+      throw new NotFoundException('No se encontro inhumado');
+    }
+    if (!mensaje) {
+      throw new BadRequestException('Publicacion is undefined');
+    }
+    const nuevaPublicacion = new Publicacion();
+    nuevaPublicacion.usuario = existingUser;
+    nuevaPublicacion.inhumado = existingInhumado;
+    nuevaPublicacion.mensaje = mensaje;
+    nuevaPublicacion.imagen = imagen ? imagen : null;
+    nuevaPublicacion.aprobada = false;
+    nuevaPublicacion.fechaPublicacion = new Date();
+    const savePublicacion =
+      await this.publicacionesRepository.save(nuevaPublicacion);
+    return savePublicacion.id;
+  }
 
   async aprobarPublicacion(id: string): Promise<Publicacion | null> {
-    const publicacion = await this.publicacionesRepository.findOne({ where: { id } });
+    const publicacion = await this.publicacionesRepository.findOne({
+      where: { id },
+    });
 
     if (!publicacion) {
-        return null;
+      throw new NotFoundException('No se encontro publicacion');
     }
 
     publicacion.aprobada = true;
     return await this.publicacionesRepository.save(publicacion);
-}
+  }
 
   async deletePublicacion(id: string): Promise<string> {
     const publicacion = await this.publicacionesRepository.findOneBy({ id });
@@ -57,6 +89,47 @@ async addPublicacion(publicacion: Partial<Publicacion>): Promise<string> {
     }
 
     await this.publicacionesRepository.remove(publicacion);
-    return publicacion.id;
+    return id;
+  }
+
+  //
+  async pendientes() {
+    const allPublicaciones = await this.publicacionesRepository.find();
+    const publicacionesPendientes = allPublicaciones.filter(
+      (pub) => pub.aprobada === false,
+    );
+    if (publicacionesPendientes.length <= 0) {
+      throw new NotFoundException('No hay publicaciones pendientes ');
+    }
+    return publicacionesPendientes;
+  }
+
+  async allPub() {
+    const publicaciones = await this.publicacionesRepository.find();
+    if (!publicaciones)
+      throw new NotFoundException('No se encontraron publicaciones ');
+    const aprobadas = publicaciones.filter((pub) => pub.aprobada === true);
+    const pendientes = publicaciones.filter((pub) => pub.aprobada === false);
+
+    return {
+      Aprobadas: aprobadas,
+      Pendientes: pendientes,
+    };
+  }
+
+  async updatePublicacion(id: string, publicacionDto: Partial <CreatePublicacionDto>){
+    const publicacion = await this.publicacionesRepository.findOneBy({ id });
+    
+    if (!publicacion) {
+      throw new NotFoundException('Publicación no encontrada');
+    }
+
+    if (publicacion.aprobada) {
+      throw new BadRequestException('No se puede editar una publicación aprobada');
+    }
+
+    await this.publicacionesRepository.update(id, publicacionDto)
+    const updatePublicacion = await this.publicacionesRepository.findOneBy({id})
+    return updatePublicacion?.id
   }
 }

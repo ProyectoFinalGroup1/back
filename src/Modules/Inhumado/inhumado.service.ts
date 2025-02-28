@@ -1,7 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { seedInhumados } from './sedeer';
 import { Inhumado } from 'src/Entities/inhumados.entity';
 import { inhumadosRepository } from './inhumado.repository';
 
@@ -27,6 +24,7 @@ export class inhumadosService {
       throw new NotFoundException('Inhumado no existente');
     }
     return inhumado;
+
   }
 
   async getInhumadoByNombreApellido(

@@ -27,7 +27,18 @@ export class inhumadosRepository {
   }
 
   async getInhumadoById(id) {
-    return this.inhumadosRepository.findOne({ where: { id } });
+
+    const inhumado = await this.inhumadosRepository.findOne({
+      where: { id },
+      relations: ['publicaciones'],
+    });
+    if (!inhumado)
+      throw new NotFoundException('No se encontro inhumado por el ID');
+    inhumado.publicaciones = inhumado.publicaciones.filter(
+      (pub) => pub.aprobada === true,
+    );
+    return inhumado;
+
   }
 
   async getInhumadoByNombreApellido(nombre: string, apellido: string) {
@@ -52,8 +63,10 @@ export class inhumadosRepository {
     if (!inhumado) {
       throw new NotFoundException('Inhumado no encontrado');
     }
-    this.inhumadosRepository.remove(inhumado);
-    return inhumado.id;
+
+    await this.inhumadosRepository.remove(inhumado);
+    return id;
+
   }
 
   async seed() {

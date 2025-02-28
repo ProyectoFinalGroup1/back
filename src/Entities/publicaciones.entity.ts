@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 import { Inhumado } from './inhumados.entity';
 
@@ -11,7 +18,9 @@ export class Publicacion {
   @JoinColumn({ name: 'usuario_id' })
   usuario: User;
 
-  @ManyToOne(() => Inhumado, (inhumado) => inhumado.id)
+  @ManyToOne(() => Inhumado, (inhumado) => inhumado.publicaciones, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'inhumado_id' })
   inhumado: Inhumado;
 
@@ -24,7 +33,6 @@ export class Publicacion {
   @CreateDateColumn()
   fechaPublicacion: Date;
 
-  @Column({ default: false, nullable: false  }) //  Inicialmente no está aprobada
+  @Column({ default: false, nullable: false })
   aprobada: boolean;
 }
-
