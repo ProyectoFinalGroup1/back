@@ -18,8 +18,13 @@ export class inhumadosService {
     return this.InhumadosRepository.addInhumado(inhumado);
   }
 
-  async getInhumadoById(id) {
-    return await this.InhumadosRepository.getInhumadoById(id);
+  async getInhumadoById(id): Promise<Inhumado> {
+    const inhumado = await this.InhumadosRepository.getInhumadoById(id);
+    if (!inhumado) {
+      throw new NotFoundException('Inhumado no existente');
+    }
+    return inhumado;
+
   }
 
   async getInhumadoByNombreApellido(

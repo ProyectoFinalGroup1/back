@@ -27,6 +27,7 @@ export class inhumadosRepository {
   }
 
   async getInhumadoById(id) {
+
     const inhumado = await this.inhumadosRepository.findOne({
       where: { id },
       relations: ['publicaciones'],
@@ -37,6 +38,7 @@ export class inhumadosRepository {
       (pub) => pub.aprobada === true,
     );
     return inhumado;
+
   }
 
   async getInhumadoByNombreApellido(nombre: string, apellido: string) {
@@ -61,8 +63,10 @@ export class inhumadosRepository {
     if (!inhumado) {
       throw new NotFoundException('Inhumado no encontrado');
     }
+
     await this.inhumadosRepository.remove(inhumado);
     return id;
+
   }
 
   async seed() {
