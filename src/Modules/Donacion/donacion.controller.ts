@@ -8,6 +8,7 @@ import {
   Logger,
   HttpCode,
   ValidationPipe,
+  Param,
 } from '@nestjs/common';
 import { DonacionService } from './donacion.service';
 import { Roles } from '../Guards/Roles/roles.decorator';
@@ -27,7 +28,7 @@ export class DonacionController {
 
   @Post('donar')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Realizar una donación' }) // Descripción del endpoint
+  @ApiOperation({ summary: 'Realizar una donación' })
   @ApiResponse({ status: 200, description: 'Donación procesada exitosamente.' })
   @ApiResponse({ status: 400, description: 'Error en la donación.' })
   async donar(
@@ -40,7 +41,7 @@ export class DonacionController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
   @Get('ALLdonaciones')
-  @ApiOperation({ summary: 'Obtener todas las donaciones' }) // Descripción del endpoint
+  @ApiOperation({ summary: 'Obtener todas las donaciones' })
   @ApiResponse({
     status: 200,
     description: 'Lista de donaciones.',
@@ -55,9 +56,26 @@ export class DonacionController {
     this.logger.log('Consultando todas las donaciones');
     return await this.donacionService.allDonations();
   }
+  @Get('donaciones-aprobadas/:userId')
+  @ApiOperation({ summary: 'Obtener donaciones aprobadas por ID de usuario' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de donaciones aprobadas del usuario.',
+    type: [Donacion],
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No se encontraron donaciones aprobadas para este usuario.',
+  })
+  async getDonacionesAprobadasByUserId(@Param('userId') userId: string) {
+    this.logger.log(
+      `Consultando donaciones aprobadas del usuario con ID: ${userId}`,
+    );
+    return await this.donacionService.getDonacionesAprobadasByUserId(userId);
+  }
 
   @Get('muro')
-  @ApiOperation({ summary: 'Obtener donaciones para el muro' }) // Descripción del endpoint
+  @ApiOperation({ summary: 'Obtener donaciones para el muro' })
   @ApiResponse({
     status: 200,
     description: 'Lista de donaciones para el muro.',
@@ -69,7 +87,7 @@ export class DonacionController {
 
   @Post('webhook')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Manejar notificaciones de webhook' }) // Descripción del endpoint
+  @ApiOperation({ summary: 'Manejar notificaciones de webhook' })
   @ApiResponse({ status: 200, description: 'Webhook procesado exitosamente.' })
   @ApiResponse({ status: 400, description: 'Error al procesar el webhook.' })
   async handleWebhook(@Body() body: any) {

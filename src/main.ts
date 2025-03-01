@@ -7,7 +7,7 @@ async function bootstrap() {
 
   // Habilitar CORS para permitir peticiones desde el frontend en localhost:3001
   app.enableCors({
-    origin: 'http://localhost:3001',
+    origin: ['http://localhost:3001', 'https://valledepaz1.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
