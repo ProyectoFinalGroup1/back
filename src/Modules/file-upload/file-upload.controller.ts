@@ -19,7 +19,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 export class FileUploadController {
   constructor(private readonly fileUploadService: FileUploadService) {}
   @ApiOperation({ summary: 'Subir imagen para un inhumado específico' })
-  @ApiBearerAuth()
+  @ApiBearerAuth('Bearer')
   @Post('uploadImage/:inhumadoId')
   @UseInterceptors(FileInterceptor('file'))
   async uploadInhumadoImage(

@@ -1,13 +1,6 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Publicacion } from './publicaciones.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from './user.entity';
 import { UsuarioInhumado } from './usuario-inhumado.entity';
 
 @Entity('inhumados')
@@ -111,9 +104,10 @@ export class Inhumado {
     (usuarioInhumado) => usuarioInhumado.inhumado,
   )
   usuarioInhumados: UsuarioInhumado[];
-  @JoinColumn({ name: 'usuario_id' })
-  usuario: User;
-
+  @ApiProperty({
+    description: 'ID del usuario',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @Column({ nullable: true })
   usuario_id: string;
 }

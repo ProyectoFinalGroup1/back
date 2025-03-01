@@ -22,7 +22,7 @@ import { Role } from '../Guards/Roles/roles.enum';
 import { RolesGuard } from '../Guards/Roles/Roles.guard';
 
 @ApiTags('Relación Usuario-Inhumado')
-@ApiBearerAuth()
+@ApiBearerAuth('Bearer')
 @Controller('usuario-inhumado')
 export class UsuarioInhumadoController {
   constructor(
@@ -41,6 +41,17 @@ export class UsuarioInhumadoController {
   @ApiResponse({ status: 404, description: 'Usuario o inhumado no encontrado' })
   async crearAsociacion(@Body() dto: CrearUsuarioInhumadoDto) {
     return await this.usuarioInhumadoService.crearAsociacion(dto);
+  }
+  @Get()
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @ApiOperation({ summary: 'Obtener todas las asociaciones usuario-inhumado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de asociaciones obtenida exitosamente',
+  })
+  async obtenerTodasLasAsociaciones() {
+    return await this.usuarioInhumadoService.obtenerTodasLasAsociaciones();
   }
 
   @Delete(':id')
