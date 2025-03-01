@@ -25,10 +25,11 @@ export class DonacionService {
 
   async allDonations() {
     const donaciones = await this.donacionRepository.find({
+      where: { Estado: true },
       relations: ['DonacionUser'],
     });
     if (donaciones.length === 0)
-      throw new BadRequestException('No hay donaciones');
+      throw new BadRequestException('No hay donaciones aprobadas');
     return donaciones;
   }
 
@@ -38,6 +39,36 @@ export class DonacionService {
       select: ['nombreMostrar', 'monto', 'mensajeAgradecimiento', 'Date'],
       order: { Date: 'DESC' },
     });
+  }
+  async getDonacionesAprobadasByUserId(userId: string): Promise<Donacion[]> {
+    const donaciones = await this.donacionRepository.find({
+      where: {
+        DonacionUser: { idUser: userId },
+        Estado: true,
+      },
+      relations: ['DonacionUser'],
+      order: { Date: 'DESC' },
+    });
+    if (donaciones.length === 0) {
+      throw new NotFoundException(
+        'No se encontraron donaciones aprobadas para este usuario',
+      );
+    }
+    return donaciones;
+  }
+
+  async getDonacionesByUserId(userId: string): Promise<Donacion[]> {
+    const donaciones = await this.donacionRepository.find({
+      where: { DonacionUser: { idUser: userId } },
+      relations: ['DonacionUser'],
+      order: { Date: 'DESC' },
+    });
+    if (donaciones.length === 0) {
+      throw new NotFoundException(
+        'No se encontraron donaciones para este usuario',
+      );
+    }
+    return donaciones;
   }
 
   async payMP(donacionDto: DonacionDto) {
