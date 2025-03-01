@@ -32,7 +32,7 @@ import { UpdateUserPreferencesDto } from '../DTO/UpdateUserPreferencesDto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')
-@ApiBearerAuth()
+@ApiBearerAuth('Bearer')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: userService) {}
@@ -113,9 +113,7 @@ export class UserController {
     return this.userService.deleteUser(id);
   }
 
-
   @ApiOperation({ summary: 'Subir imagen de perfil para user' })
-  @ApiBearerAuth()
   @Post('uploadImmagenPerfil/:userId')
   @UseInterceptors(FileInterceptor('file'))
   async uploadImgPerfil(
@@ -135,6 +133,6 @@ export class UserController {
     )
     file: Express.Multer.File,
   ) {
-    return this.userService.uploadImgPerfil(file,userId);
-}
+    return this.userService.uploadImgPerfil(file, userId);
+  }
 }

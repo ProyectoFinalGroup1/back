@@ -67,24 +67,11 @@ export class UsuarioInhumadoService {
     return this.usuarioInhumadoRepository.save(nuevaAsociacion);
   }
 
-  async eliminarAsociacion(id: string): Promise<void> {
-    const asociacion = await this.usuarioInhumadoRepository.findOne({
-      where: { id },
-    });
-
-    if (!asociacion) {
-      throw new NotFoundException(`Asociación con ID ${id} no encontrada`);
-    }
-
-    await this.usuarioInhumadoRepository.remove(asociacion);
-  }
-
   async obtenerInhumadosPorUsuario(usuarioId: string): Promise<Inhumado[]> {
     const asociaciones = await this.usuarioInhumadoRepository.find({
       where: { usuario: { idUser: usuarioId } },
       relations: ['inhumado'],
     });
-
     return asociaciones.map((asociacion) => asociacion.inhumado);
   }
 
@@ -93,7 +80,31 @@ export class UsuarioInhumadoService {
       where: { inhumado: { id: inhumadoId } },
       relations: ['usuario'],
     });
-
     return asociaciones.map((asociacion) => asociacion.usuario);
+  }
+
+  async obtenerTodasLasAsociaciones() {
+    const asociaciones = await this.usuarioInhumadoRepository.find({
+      relations: ['usuario', 'inhumado'],
+    });
+    return asociaciones.map((asociacion) => ({
+      id: asociacion.id,
+      usuarioId: asociacion.usuario.idUser,
+      nombreUsuario: `${asociacion.usuario.nombre} ${asociacion.usuario.apellido}`,
+      emailUsuario: asociacion.usuario.email,
+      inhumadoId: asociacion.inhumado.id,
+      nombreInhumado: `${asociacion.inhumado.nombre} ${asociacion.inhumado.apellido}`,
+      fechaAsociacion: asociacion.fechaAsociacion,
+    }));
+  }
+
+  async eliminarAsociacion(id: string): Promise<void> {
+    const asociacion = await this.usuarioInhumadoRepository.findOne({
+      where: { id },
+    });
+    if (!asociacion) {
+      throw new NotFoundException(`Asociación con ID ${id} no encontrada`);
+    }
+    await this.usuarioInhumadoRepository.remove(asociacion);
   }
 }

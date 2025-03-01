@@ -57,7 +57,7 @@ export class userService {
     if (!deleteUser) {
       throw new BadRequestException('No se pudo eliminar usuario');
     }
-    return { message: 'Usuario eliminado exitosamente' };
+    return id;
   }
 
   // Método para actualizar las preferencias de notificaciones de un usuario
@@ -84,7 +84,6 @@ export class userService {
     return await this.userRepository.save(findUser);
   }
 
-
   async uploadImgPerfil(
     file: Express.Multer.File,
     userId: string,
@@ -102,9 +101,7 @@ export class userService {
     });
 
     if (!user) {
-      throw new NotFoundException(
-       `User con ID ${userId} no encontrado`,
-      );
+      throw new NotFoundException(`User con ID ${userId} no encontrado`);
     }
 
     // Subir la imagen a Cloudinary
@@ -130,7 +127,8 @@ export class userService {
     } catch (error) {
       throw new Error(
         `Error al subir la imagen: ${error instanceof Error ? error.message : 'Error desconocido'},
-      `);
+      `,
+      );
     }
 
     // Verificar que la respuesta de Cloudinary contenga los campos esperados
@@ -144,6 +142,6 @@ export class userService {
     user.imagenUrl = result.secure_url;
     await this.userRepository.save(user);
 
-    return { imageUrl: result.secure_url };
-  }
+    return { imageUrl: result.secure_url };
+  }
 }

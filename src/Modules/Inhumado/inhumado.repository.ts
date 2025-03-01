@@ -10,6 +10,9 @@ import { seedInhumados } from './sedeer';
 import { v2 as cloudinary } from 'cloudinary';
 import { CreateInhumadoDto } from '../DTO/createInhumadoDto';
 
+interface AsociacionCount {
+  count: string;
+}
 @Injectable()
 export class inhumadosRepository {
   constructor(
@@ -63,7 +66,7 @@ export class inhumadosRepository {
   async getInhumadoById(id) {
     const inhumado = await this.inhumadosRepository.findOne({
       where: { id },
-      relations: ['publicaciones', 'usuario'],
+      relations: ['publicaciones'],
     });
     if (!inhumado)
       throw new NotFoundException('No se encontro inhumado por el ID');
@@ -89,15 +92,63 @@ export class inhumadosRepository {
     return updateInhumado;
   }
 
-  async deleteInhumado(id: string) {
-    const inhumado = await this.inhumadosRepository.findOneBy({ id });
+  // Define una interfaz para el resultado de la consulta(se agrega por el error/advertencia de tipado)
+
+  async deleteInhumado(id: string): Promise<{ message: string }> {
+    const inhumado = await this.inhumadosRepository.findOne({
+      where: { id },
+    });
 
     if (!inhumado) {
       throw new NotFoundException('Inhumado no encontrado');
     }
 
-    await this.inhumadosRepository.remove(inhumado);
-    return id;
+    // Verificar si tiene asociaciones en la tabla usuario_inhumado
+    const asociaciones = await this.inhumadosRepository.manager.query<
+      AsociacionCount[]
+    >(`SELECT COUNT(*) as count FROM usuario_inhumado WHERE inhumado_id = $1`, [
+      id,
+    ]);
+
+    // Validar y convertir el resultado de forma segura
+    if (!asociaciones || !asociaciones[0]) {
+      throw new Error('Error al consultar asociaciones');
+    }
+
+    const countValue = asociaciones[0].count;
+    const cantidadAsociaciones =
+      typeof countValue === 'string'
+        ? parseInt(countValue, 10)
+        : typeof countValue === 'number'
+          ? countValue
+          : 0;
+
+    if (cantidadAsociaciones > 0) {
+      console.error(
+        `No se puede eliminar el inhumado ${id} porque tiene ${cantidadAsociaciones} asociaciones con usuarios`,
+      );
+      throw new BadRequestException(
+        `No se puede eliminar el inhumado porque tiene ${cantidadAsociaciones} asociaciones con usuarios. ` +
+          `Debe eliminar estas asociaciones primero usando la ruta DELETE /usuario-inhumado/{id_asociacion}.`,
+      );
+    }
+
+    try {
+      await this.inhumadosRepository.remove(inhumado);
+      return { message: `Inhumado id: ${id} fue eliminado exitosamente` };
+    } catch (error) {
+      console.error('Error al eliminar inhumado:', error);
+      if (error.code === '23503') {
+        // Error de clave foránea
+        throw new BadRequestException(
+          'No se puede eliminar este inhumado porque está siendo referenciado en otras tablas. ' +
+            'Debe eliminar primero todas las referencias a este inhumado.',
+        );
+      }
+      throw new BadRequestException(
+        'Error al eliminar inhumado: ' + error.message,
+      );
+    }
   }
 
   async seed() {
@@ -121,34 +172,5 @@ export class inhumadosRepository {
     });
     await this.inhumadosRepository.save(precarga);
     return { message: 'Seeder ejecutado con exito' };
-  }
-  //ASIGNAR USUARIO A INHUMADO
-  async asignarUsuario(id: string, usuarioId: string) {
-    // Verificar que el inhumado existe
-    const inhumado = await this.inhumadosRepository.findOne({
-      where: { id },
-      relations: ['publicaciones'],
-    });
-
-    if (!inhumado) {
-      throw new NotFoundException('Inhumado no encontrado');
-    }
-
-    // Actualizar solo el campo usuario_id usando QueryBuilder
-    // Esto evita problemas con relaciones one-to-many
-    await this.inhumadosRepository
-      .createQueryBuilder()
-      .update()
-      .set({ usuario_id: usuarioId })
-      .where('id = :id', { id })
-      .execute();
-
-    // Obtener el inhumado actualizado
-    const updatedInhumado = await this.inhumadosRepository.findOne({
-      where: { id },
-      relations: ['publicaciones', 'usuario'],
-    });
-
-    return updatedInhumado;
   }
 }

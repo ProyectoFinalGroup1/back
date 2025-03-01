@@ -53,11 +53,7 @@ export class inhumadosService {
     return this.InhumadosRepository.updateInhumado(id, inhumado);
   }
 
-  deleteInhumado(id: string): Promise<string> {
+  deleteInhumado(id: string): Promise<{ message: string }> {
     return this.InhumadosRepository.deleteInhumado(id);
-  }
-  //ASIGNAR USUARIO A INHUMADO
-  async asignarUsuario(id: string, usuarioId: string) {
-    return await this.InhumadosRepository.asignarUsuario(id, usuarioId);
   }
 }
