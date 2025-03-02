@@ -17,7 +17,10 @@ export class UpdateUserPreferencesDto {
     return Boolean(value);
   })
   recibirRecordatoriosAniversarios?: boolean;
-
+  @ApiProperty({
+    description:
+      'Preferencia para recibir avisos de fecha de pago de servicios funerarios',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)
