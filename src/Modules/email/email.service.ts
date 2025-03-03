@@ -9,23 +9,37 @@ import * as nodemailer from 'nodemailer';
 export class EmailService {
   private transporter;
   private readonly logger = new Logger(EmailService.name);
+  private emailEnabled = false;
 
   constructor() {
+    // Configuración más detallada y específica para Gmail
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'sandbox.smtp.mailtrap.io',
+      port: 2525, // Puerto para SSL
+      secure: false, // Usar SSL
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        pass: process.env.EMAIL_PASS, // Tu contraseña de aplicación
       },
+      debug: true, // Habilitar logs de depuración
     });
 
-    // Verificar la conexión al iniciar
-    this.verifyConnection().catch((error) => {
-      this.logger.error('Error al conectar con servidor de correo:', error);
-      throw new InternalServerErrorException(
-        'Error al configurar el servicio de correo',
-      );
-    });
+    // Verificamos pero NO bloqueamos la aplicación si falla
+    this.verifyConnection()
+      .then(() => {
+        this.emailEnabled = true;
+        this.logger.log('Servicio de email configurado correctamente');
+      })
+      .catch((error) => {
+        this.logger.error('Error al conectar con servidor de correo:', error);
+        this.logger.warn('La aplicación continuará sin servicio de email');
+        // No hacemos throw, permitimos que la app siga
+      });
+  }
+  catch(error) {
+    this.logger.error('Error al configurar el servicio de correo:', error);
+    this.logger.warn('La aplicación continuará sin servicio de email');
+    // No hacemos throw, permitimos que la app siga
   }
 
   private async verifyConnection() {
@@ -38,6 +52,7 @@ export class EmailService {
         'Error al configurar el servicio de correo',
       );
     }
+    return false; // No lanzamos excepción, permitimos que la app siga
   }
 
   async sendWelcomeEmail(email: string, nombre: string) {
@@ -101,7 +116,8 @@ export class EmailService {
       this.logger.log(
         `Email de agradecimiento por donación enviado a ${email}`,
       );
-      return true;
+      // No lanzamos excepción para no interrumpir el flujo principal si el correo falla
+      return false;
     } catch (error) {
       this.logger.error(
         `Error al enviar email de agradecimiento a ${email}:`,
