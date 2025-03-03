@@ -44,9 +44,9 @@ export class InhumadoController {
     await this.inhumadosService.seed();
     return { message: 'sedder exitoso' }; //borrar
   }
-
-  @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard)
+  // Comenta temporalmente estos decoradores para pruebas
+  // @Roles(Role.Admin)
+  // @UseGuards(AuthGuard, RolesGuard)
   @Get()
   @ApiOperation({ summary: 'Obtener lista de todos los inhumados' })
   @ApiResponse({

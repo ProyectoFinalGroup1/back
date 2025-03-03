@@ -1,6 +1,5 @@
 // src/Modules/donacion/dto/donacion.dto.ts
 import {
-  IsEmail,
   IsNumber,
   IsOptional,
   IsString,
@@ -24,7 +23,7 @@ export class DonacionDto {
     description: 'Email del donante, debe ser un email válido',
     example: 'donante@example.com',
   })
-  @IsEmail({}, { message: 'Debe proporcionar un email válido' })
+  @IsString()
   email: string;
 
   @ApiProperty({
