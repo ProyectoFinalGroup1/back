@@ -32,8 +32,21 @@ export class DonacionController {
   @ApiResponse({ status: 200, description: 'Donación procesada exitosamente.' })
   @ApiResponse({ status: 400, description: 'Error en la donación.' })
   async donar(
-    @Body(new ValidationPipe({ transform: true })) donacionDto: DonacionDto,
+    @Body(
+      new ValidationPipe({
+        transform: true,
+        skipMissingProperties: true, // Permite omitir propiedades faltantes
+        forbidNonWhitelisted: false, // No rechaza propiedades no listadas
+      }),
+    )
+    donacionDto: DonacionDto,
   ) {
+    // Verificar que el email no esté vacío
+    if (!donacionDto.email || donacionDto.email.trim() === '') {
+      throw new BadRequestException(
+        'Debe proporcionar un email válido para procesar la donación',
+      );
+    }
     this.logger.log(`Procesando donación: ${JSON.stringify(donacionDto)}`);
     return this.donacionService.payMP(donacionDto);
   }
