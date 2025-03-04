@@ -5,7 +5,7 @@ import { ReminderService } from './reminder.service';
 import { EmailModule } from '../email/email.module';
 import { User } from 'src/Entities/user.entity';
 import { Inhumado } from 'src/Entities/inhumados.entity';
-import { ReminderController } from './remider.controller';
+import { ReminderController } from './reminder.controller';
 import { UsuarioInhumadoModule } from '../UsuarioInhumado/usuario-inhumado.module';
 
 @Module({

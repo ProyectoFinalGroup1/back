@@ -13,6 +13,7 @@ import { MensajesVirgenModule } from './Modules/mensajesVirgen/menVir.module';
 import { DonacionModule } from './Modules/Donacion/donacion.module';
 import { ReminderModule } from './Modules/recordatorios/reminder.module';
 import { UsuarioInhumadoModule } from './Modules/UsuarioInhumado/usuario-inhumado.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UsuarioInhumadoModule } from './Modules/UsuarioInhumado/usuario-inhumad
     DonacionModule,
     ReminderModule,
     UsuarioInhumadoModule,
+    ScheduleModule.forRoot(),
 
     TypeOrmModule.forRoot({
       type: 'postgres',

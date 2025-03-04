@@ -40,6 +40,7 @@ export class DonacionService {
       order: { Date: 'DESC' },
     });
   }
+
   async getDonacionesAprobadasByUserId(userId: string): Promise<Donacion[]> {
     const donaciones = await this.donacionRepository.find({
       where: {
@@ -96,30 +97,37 @@ export class DonacionService {
     }
 
     try {
-      // Usar Preference en lugar de Payment
-      const mp = new Preference(
-        new MercadoPagoConfig({
-          accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
-        }),
-      );
+      const client = new MercadoPagoConfig({
+        accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
+      });
 
-      // Obtener URL base o usar una por defecto
+      const mp = new Preference(client);
+
+      // Asegurarnos de tener una URL base válida
       const appBaseUrl = process.env.APP_URL || 'http://localhost:3000';
+
+      // Asegurarnos de que el monto sea un número válido
+      const montoNumerico = Number(monto);
+      if (isNaN(montoNumerico) || montoNumerico <= 0) {
+        throw new BadRequestException(
+          'El monto debe ser un número válido mayor a cero',
+        );
+      }
 
       const preferenceData = {
         items: [
           {
             id: 'donacion-' + new Date().getTime(),
-            title: 'Donación',
+            title: 'Donación a la Capilla',
             description: 'Donación a la Capilla',
             quantity: 1,
-            unit_price: monto,
+            unit_price: montoNumerico,
             currency_id: 'ARS', // Ajusta según tu país (ARS para Argentina)
           },
         ],
         payer: {
           email: email,
-          name: findUser.nombre || '',
+          name: findUser.nombre || 'Donante',
           surname: findUser.apellido || '',
         },
         back_urls: {
@@ -131,7 +139,14 @@ export class DonacionService {
         statement_descriptor: 'Donación Capilla',
         external_reference: findUser.idUser.toString(),
         notification_url: `${appBaseUrl}/mercadopago/webhook`,
+        // Configuración adicional para mejorar tasa de aprobación
+        binary_mode: false, // Permite pagos pendientes
       };
+
+      // Registrar la solicitud enviada a Mercado Pago para depuración
+      this.logger.log(
+        `Enviando solicitud a Mercado Pago: ${JSON.stringify(preferenceData)}`,
+      );
 
       const preference = await mp.create({ body: preferenceData });
       this.logger.log(`Preferencia creada: ${JSON.stringify(preference)}`);
@@ -140,9 +155,9 @@ export class DonacionService {
       const donacion = new Donacion();
       donacion.Date = new Date();
       donacion.Estado = false; // Inicialmente pendiente
-      donacion.monto = monto;
+      donacion.monto = montoNumerico;
       donacion.DonacionUser = findUser;
-      donacion.nombreMostrar = nombreMostrar || findUser.nombre || '';
+      donacion.nombreMostrar = nombreMostrar || findUser.nombre || 'Anónimo';
       donacion.mensajeAgradecimiento = mensajeAgradecimiento || '';
       donacion.mostrarEnMuro =
         mostrarEnMuro !== undefined ? mostrarEnMuro : true;
@@ -175,7 +190,7 @@ export class DonacionService {
       // Mostrar más detalles del error para depuración
       if (error.response) {
         this.logger.error(
-          `Detalles del error: ${JSON.stringify(error.response)}`,
+          `Detalles del error: ${JSON.stringify(error.response.data || error.response)}`,
         );
       }
       throw new BadRequestException(
@@ -194,11 +209,11 @@ export class DonacionService {
         const paymentId = data.data.id;
 
         // Consultar el estado del pago
-        const mp = new Payment(
-          new MercadoPagoConfig({
-            accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
-          }),
-        );
+        const mpConfig = new MercadoPagoConfig({
+          accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
+        });
+
+        const mp = new Payment(mpConfig);
 
         const paymentInfo = await mp.get({ id: paymentId });
         this.logger.log(`Información del pago: ${JSON.stringify(paymentInfo)}`);
