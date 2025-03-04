@@ -14,7 +14,7 @@ import { DonacionModule } from './Modules/Donacion/donacion.module';
 import { ReminderModule } from './Modules/recordatorios/reminder.module';
 import { UsuarioInhumadoModule } from './Modules/UsuarioInhumado/usuario-inhumado.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { User } from 'mercadopago';
+
 
 @Module({
   imports: [
@@ -28,7 +28,6 @@ import { User } from 'mercadopago';
     MensajesVirgenModule,
     UserModule,
     AuthModule,
-    User,
     DialogflowModule,
     FileUploadModule,
     DonacionModule,
