@@ -47,7 +47,7 @@ export class User {
   })
   @Column({ type: 'varchar', length: 50, nullable: false, unique: true })
   email: string;
-  
+
   @ApiProperty({
     description: 'URL de la imagen del inhumado',
     example: 'https://example.com/image.jpg',

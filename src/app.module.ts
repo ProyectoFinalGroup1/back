@@ -15,6 +15,13 @@ import { ReminderModule } from './Modules/recordatorios/reminder.module';
 import { UsuarioInhumadoModule } from './Modules/UsuarioInhumado/usuario-inhumado.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
+// Importar explícitamente todas las entidades
+import { User } from './Entities/user.entity';
+import { Donacion } from './Entities/donacion.entity';
+import { Publicacion } from './Entities/publicaciones.entity';
+import { MensajeAVirgen } from './Entities/mensajesVirgen.entity';
+import { Inhumado } from './Entities/inhumados.entity';
+import { UsuarioInhumado } from './Entities/usuario-inhumado.entity';
 
 @Module({
   imports: [
@@ -38,11 +45,22 @@ import { ScheduleModule } from '@nestjs/schedule';
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
-      entities: ['dist/**/*.entity{.ts,.js}'],
+      // Importar explícitamente todas las entidades
+      entities: [
+        User,
+        Donacion,
+        Publicacion,
+        MensajeAVirgen,
+        Inhumado,
+        UsuarioInhumado,
+        // Mantener el patrón glob como respaldo
+        'dist/**/*.entity{.ts,.js}',
+      ],
       migrations: ['dist/migrations/*{.js,.ts}'],
       synchronize: true,
       migrationsRun: true,
       logging: true,
+      autoLoadEntities: true, // Añadir esta opción para mayor seguridad
     }),
     JwtModule.register({
       global: true,

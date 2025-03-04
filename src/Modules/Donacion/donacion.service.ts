@@ -6,9 +6,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
-import { Donacion } from 'src/Entities/donacion.entity';
+// Cambiar las rutas de importación de entidades
+import { Donacion } from '../../Entities/donacion.entity';
 import { Repository } from 'typeorm';
-import { User } from 'src/Entities/user.entity';
+import { User } from '../../Entities/user.entity';
 import { EmailService } from '../email/email.service';
 import { DonacionDto } from './donacionDTO';
 
@@ -72,114 +73,224 @@ export class DonacionService {
   }
 
   async payMP(donacionDto: DonacionDto) {
-    const {
-      email,
-      monto,
-      nombreMostrar,
-      mensajeAgradecimiento,
-      mostrarEnMuro,
-    } = donacionDto;
-
-    this.logger.log(`Procesando donación: ${JSON.stringify(donacionDto)}`);
-
-    // Verificar token
-    if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
-      throw new BadRequestException('Token de Mercado Pago no configurado');
-    }
-
-    const findUser = await this.userRepository.findOne({
-      where: { email },
-    });
-
-    if (!findUser) {
-      throw new NotFoundException('No se encontró al usuario');
-    }
+    console.log(
+      ' INICIANDO payMP - DTO recibido:',
+      JSON.stringify(donacionDto),
+    );
 
     try {
-      // Usar Preference en lugar de Payment
-      const mp = new Preference(
-        new MercadoPagoConfig({
-          accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
-        }),
+      const {
+        email,
+        monto,
+        nombreMostrar,
+        mensajeAgradecimiento,
+        mostrarEnMuro,
+      } = donacionDto;
+
+      console.log(
+        'VARIABLES EXTRAIDAS DEL DTO - email:',
+        email,
+        'monto:',
+        monto,
+      );
+      this.logger.log(`Procesando donación: ${JSON.stringify(donacionDto)}`);
+
+      // Verificar token
+      console.log(
+        'VERIFICANDO TOKEN DE  Mercado Pago:',
+        process.env.MERCADOPAGO_ACCESS_TOKEN ? 'Existe' : 'No existe',
+      );
+      if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
+        console.log('ERROR: TOKEN DE MERCADO PAGO NO CONFIGURADO');
+        throw new BadRequestException('Token de Mercado Pago no configurado');
+      }
+
+      console.log(
+        'ANTES DE BUSCAR USUARIO - REPOSITORIO EXISTE:',
+        !!this.userRepository,
       );
 
-      // Obtener URL base o usar una por defecto
-      const appBaseUrl = process.env.APP_URL || 'http://localhost:3000';
+      try {
+        console.log('INTENTANDO ENCONTRAR USUARIO CON EMAIL:', email);
+        console.log('TIPO DE userRepository:', typeof this.userRepository);
+        console.log(
+          ' METODOS DISPONIBLES EN  userRepository:',
+          Object.getOwnPropertyNames(
+            Object.getPrototypeOf(this.userRepository),
+          ),
+        );
 
-      const preferenceData = {
-        items: [
-          {
-            id: 'donacion-' + new Date().getTime(),
-            title: 'Donación',
-            description: 'Donación a la Capilla',
-            quantity: 1,
-            unit_price: monto,
-            currency_id: 'ARS', // Ajusta según tu país (ARS para Argentina)
-          },
-        ],
-        payer: {
-          email: email,
-          name: findUser.nombre || '',
-          surname: findUser.apellido || '',
-        },
-        back_urls: {
-          success: `${appBaseUrl}/donacion/success`,
-          failure: `${appBaseUrl}/donacion/failure`,
-          pending: `${appBaseUrl}/donacion/pending`,
-        },
-        auto_return: 'approved',
-        statement_descriptor: 'Donación Capilla',
-        external_reference: findUser.idUser.toString(),
-        notification_url: `${appBaseUrl}/mercadopago/webhook`,
-      };
+        // Verificar si la entidad está registrada
+        console.log('VERIFICANDO METADATOS DE USER ANTES DE findOne');
+        if (this.userRepository.metadata) {
+          console.log(
+            'METADATA DE USER ENCONTRADA:',
+            this.userRepository.metadata.name,
+          );
+        } else {
+          console.log('NO SE ENCONTRO METADATA PARA USER');
+        }
 
-      const preference = await mp.create({ body: preferenceData });
-      this.logger.log(`Preferencia creada: ${JSON.stringify(preference)}`);
+        const findUser = await this.userRepository.findOne({
+          where: { email },
+        });
 
-      // Guardar donación en estado pendiente
-      const donacion = new Donacion();
-      donacion.Date = new Date();
-      donacion.Estado = false; // Inicialmente pendiente
-      donacion.monto = monto;
-      donacion.DonacionUser = findUser;
-      donacion.nombreMostrar = nombreMostrar || findUser.nombre || '';
-      donacion.mensajeAgradecimiento = mensajeAgradecimiento || '';
-      donacion.mostrarEnMuro =
-        mostrarEnMuro !== undefined ? mostrarEnMuro : true;
-      donacion.transactionId = preference.id || '';
-      donacion.metodoPago = ''; // Se actualizará cuando se complete el pago
+        console.log(
+          'RESULTADO DE LA BUSQUEDA DE USUARIO:',
+          findUser ? 'USUARIO ENCONTRADO' : 'USUARIO NO ENCONTRADO',
+        );
 
-      const donacionGuardada = await this.donacionRepository.save(donacion);
-      this.logger.log(`Donación guardada: ${JSON.stringify(donacionGuardada)}`);
+        if (findUser) {
+          console.log('ID DE USUARIO ENCONTRADO:', findUser.idUser);
+          console.log('NOMBRE DE USUARIO:', findUser.nombre);
+          console.log('APELLIDO DE USUARIO:', findUser.apellido);
+        }
 
-      return {
-        success: true,
-        mensaje: 'Enlace de pago generado correctamente',
-        donacion: {
-          id: donacionGuardada.idDonacion,
-          monto: donacionGuardada.monto,
-          estado: 'pendiente',
-          fecha: donacionGuardada.Date,
-        },
-        pagoInfo: {
-          preferenceId: preference.id,
-          init_point: preference.init_point, // URL para redirigir al usuario al checkout
-          sandbox_init_point: preference.sandbox_init_point, // Para ambiente de pruebas
-        },
-      };
-    } catch (error) {
+        if (!findUser) {
+          console.log('ERROR: NO SE ENCONTRO USUARIO CON EMAIL:', email);
+          throw new NotFoundException('No se encontró al usuario');
+        }
+
+        // Usar Preference en lugar de Payment
+        console.log('CONFIGURANDO OBJETO PREFERENCIA DE MERCADO PAGO');
+        try {
+          const mp = new Preference(
+            new MercadoPagoConfig({
+              accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
+            }),
+          );
+
+          // Obtener URL base o usar una por defecto
+          const appBaseUrl = process.env.APP_URL || 'http://localhost:3000';
+          console.log('URL BASE PARA callbacks:', appBaseUrl);
+
+          console.log('CREANDO OBJETO DE PREFERENCIA PARA API DE MERCADOPAGO');
+          const preferenceData = {
+            items: [
+              {
+                id: 'donacion-' + new Date().getTime(),
+                title: 'Donación',
+                description: 'Donación a la Capilla',
+                quantity: 1,
+                unit_price: monto,
+                currency_id: 'ARS',
+              },
+            ],
+            payer: {
+              email: email,
+              name: findUser.nombre || '',
+              surname: findUser.apellido || '',
+            },
+            back_urls: {
+              success: `${appBaseUrl}/donacion/success`,
+              failure: `${appBaseUrl}/donacion/failure`,
+              pending: `${appBaseUrl}/donacion/pending`,
+            },
+            auto_return: 'approved',
+            statement_descriptor: 'Donación Capilla',
+            external_reference: findUser.idUser.toString(),
+            notification_url: `${appBaseUrl}/mercadopago/webhook`,
+          };
+
+          console.log(
+            'DATOS DE PREFERENCIAS PREPARADOS:',
+            JSON.stringify(preferenceData),
+          );
+          console.log(
+            'LLAMANDO A API DE MERCADO PAGO PARA CREAR PREFERENCIA...',
+          );
+
+          const preference = await mp.create({ body: preferenceData });
+          console.log('PREFERENCIA CREADA EXITOSAMENTE. ID:', preference.id);
+          this.logger.log(`Preferencia creada: ${JSON.stringify(preference)}`);
+
+          // Guardar donación en estado pendiente
+          console.log('CREANDO OBJETO DE DONACION PARA GUARDAR EN BD');
+          const donacion = new Donacion();
+          donacion.Date = new Date();
+          donacion.Estado = false; // Inicialmente pendiente
+          donacion.monto = monto;
+          donacion.DonacionUser = findUser;
+          donacion.nombreMostrar = nombreMostrar || findUser.nombre || '';
+          donacion.mensajeAgradecimiento = mensajeAgradecimiento || '';
+          donacion.mostrarEnMuro =
+            mostrarEnMuro !== undefined ? mostrarEnMuro : true;
+          donacion.transactionId = preference.id || '';
+          donacion.metodoPago = ''; // Se actualizará cuando se complete el pago
+
+          console.log('OBJETO DE DONACION CREADO:', JSON.stringify(donacion));
+          console.log('GUARDANDO DONACION EN LA BASE DE DATOS...');
+
+          const donacionGuardada = await this.donacionRepository.save(donacion);
+          console.log(
+            'DONACION GUARDADA EXITOSAMENTE. ID:',
+            donacionGuardada.idDonacion,
+          );
+          this.logger.log(
+            `Donación guardada: ${JSON.stringify(donacionGuardada)}`,
+          );
+
+          console.log('AQUI!!-PREPARANDO RESPUESTA DE EXITO');
+          return {
+            success: true,
+            mensaje: 'Enlace de pago generado correctamente',
+            donacion: {
+              id: donacionGuardada.idDonacion,
+              monto: donacionGuardada.monto,
+              estado: 'pendiente',
+              fecha: donacionGuardada.Date,
+            },
+            pagoInfo: {
+              preferenceId: preference.id,
+              init_point: preference.init_point,
+              sandbox_init_point: preference.sandbox_init_point,
+            },
+          };
+        } catch (mercadoPagoError) {
+          console.log(
+            'Error en la integración con MercadoPago:',
+            mercadoPagoError.message,
+          );
+          console.log('Stack de error de MercadoPago:', mercadoPagoError.stack);
+          throw mercadoPagoError;
+        }
+      } catch (userError) {
+        console.log('ERROR AL BUSCAR USUARIO:', userError.message);
+        console.log('TIPO DE ERROR:', userError.constructor.name);
+        console.log('STACK TRACE:', userError.stack);
+
+        // Intentar determinar más información sobre el error
+        if (userError.message.includes('EntityMetadataNotFound')) {
+          console.log('CONFIRMADO: Es un error de EntityMetadataNotFound');
+          console.log(
+            'DETALLES DE LA ENTIDAD QUE CAUSA PROBLEMAS:',
+            userError.message,
+          );
+        }
+
+        throw userError;
+      }
+    } catch (generalError) {
+      console.log('Error general en payMP:', generalError.message);
+      console.log('Stack trace completo:', generalError.stack);
+
       this.logger.error(
-        `Error al procesar el pago: ${error.message}`,
-        error.stack,
+        `Error al procesar el pago: ${generalError.message}`,
+        generalError.stack,
       );
-      // Mostrar más detalles del error para depuración
-      if (error.response) {
+
+      if (generalError.response) {
+        console.log(
+          'Detalles adicionales del error (response):',
+          JSON.stringify(generalError.response),
+        );
         this.logger.error(
-          `Detalles del error: ${JSON.stringify(error.response)}`,
+          `Detalles del error: ${JSON.stringify(generalError.response)}`,
         );
       }
+
       throw new BadRequestException(
-        `Error al procesar el pago: ${error.message}`,
+        `Error al procesar el pago: ${generalError.message}`,
       );
     }
   }
