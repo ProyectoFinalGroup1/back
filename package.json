@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "nest build --webpack",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -34,6 +34,7 @@
     "@types/multer": "^1.4.12",
     "@types/nodemailer": "^6.4.17",
     "bcrypt": "^5.1.1",
+    "buffer": "^6.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cloudinary": "^2.5.1",
@@ -49,8 +50,10 @@
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "stream-browserify": "^3.0.0",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.20",
+    "util": "^0.12.5",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
@@ -67,6 +70,7 @@
     "@types/node": "^22.13.5",
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/supertest": "^6.0.2",
+    "@types/webcrypto": "^0.0.30",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",

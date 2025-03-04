@@ -1,3 +1,4 @@
+import './crypto-polyfill';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -14,7 +15,6 @@ async function bootstrap() {
   });
 
   // Configuración de CSP usando Helmet
-  // Configuración de CSP usando Helmet - CORREGIDA
   app.use(
     helmet.contentSecurityPolicy({
       directives: {
