@@ -113,6 +113,7 @@ export class UserController {
     return this.userService.deleteUser(id);
   }
 
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Subir imagen de perfil para user' })
   @Post('uploadImmagenPerfil/:userId')
   @UseInterceptors(FileInterceptor('file'))
@@ -135,4 +136,28 @@ export class UserController {
   ) {
     return this.userService.uploadImgPerfil(file, userId);
   }
+
+
+  @UseGuards(AuthGuard)
+@ApiOperation({ summary: 'Actualizar imagen de perfil para user' })
+@Put('updateImagenPerfil/:userId')
+@UseInterceptors(FileInterceptor('file'))
+async updateImgPerfil(
+  @Param('userId', ParseUUIDPipe) userId: string,
+  @UploadedFile(
+    new ParseFilePipe({
+      validators: [
+        new MaxFileSizeValidator({
+          maxSize: 2000000,
+          message: 'El tamaño de la imagen debe ser inferior a 2MB',
+        }),
+        new FileTypeValidator({
+          fileType: /^(image\/jpeg|image\/png)$/ 
+        }),
+      ],
+    }),
+  ) file: Express.Multer.File
+) {
+  return this.userService.updateImgPerfil(file, userId);
+}
 }
