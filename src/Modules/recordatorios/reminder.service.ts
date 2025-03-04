@@ -23,29 +23,44 @@ export class ReminderService {
   // Ejecutar todos los días a las 9:00 AM para recordatorios de 7 días antes
   @Cron(CronExpression.EVERY_DAY_AT_9AM)
   async sendWeeklyReminders() {
-    this.logger.log('Iniciando envío de recordatorios semanales...');
+    try {
+      this.logger.log('Iniciando envío de recordatorios semanales...');
 
-    // Encontrar aniversarios de fallecimiento en 7 días
-    await this.sendDeathAnniversaryReminders(7);
+      // Encontrar aniversarios de fallecimiento en 7 días
+      await this.sendDeathAnniversaryReminders(7);
 
-    // Encontrar pagos en 7 días
-    await this.sendPaymentReminders(7);
+      // Encontrar pagos en 7 días
+      await this.sendPaymentReminders(7);
 
-    this.logger.log('Finalizado envío de recordatorios semanales');
+      this.logger.log('Finalizado envío de recordatorios semanales');
+    } catch (err) {
+      this.logger.error(
+        `Error al enviar recordatorios semanales: ${err.message}`,
+        err.stack,
+      );
+    }
   }
 
   // Ejecutar todos los días a las 10:00 AM para recordatorios de 1 día antes
   @Cron(CronExpression.EVERY_DAY_AT_10AM)
+  // @Cron('*/5 * * * *') // Se ejecuta cada 5 minutos
   async sendDailyReminders() {
-    this.logger.log('Iniciando envío de recordatorios diarios...');
+    try {
+      this.logger.log('Iniciando envío de recordatorios diarios...');
 
-    // Encontrar aniversarios de fallecimiento mañana
-    await this.sendDeathAnniversaryReminders(1);
+      // Encontrar aniversarios de fallecimiento mañana
+      await this.sendDeathAnniversaryReminders(1);
 
-    // Encontrar pagos de mañana
-    await this.sendPaymentReminders(1);
+      // Encontrar pagos de mañana
+      await this.sendPaymentReminders(1);
 
-    this.logger.log('Finalizado envío de recordatorios diarios');
+      this.logger.log('Finalizado envío de recordatorios diarios');
+    } catch (err) {
+      this.logger.error(
+        `Error al enviar recordatorios diarios: ${err.message}`,
+        err.stack,
+      );
+    }
   }
 
   // Método para enviar recordatorios de aniversarios de fallecimiento
@@ -57,21 +72,47 @@ export class ReminderService {
 
       const targetMonth = targetDate.getMonth() + 1; // JavaScript meses son 0-11
       const targetDay = targetDate.getDate();
+      this.logger.log(
+        `Buscando aniversarios para el día ${targetDay}/${targetMonth}`,
+      );
 
-      // Buscar todos los inhumados
-      const allInhumados = await this.inhumadoRepository.find({
-        relations: ['usuario'],
-      });
+      // Buscar todos los inhumados - SIN RELACIÓN
+      const allInhumados = await this.inhumadoRepository.find();
 
-      // Filtrar inhumados cuyo aniversario de fallecimiento sea en la fecha objetivo
+      if (!allInhumados || allInhumados.length === 0) {
+        this.logger.warn('No se encontraron inhumados en la base de datos');
+        return;
+      }
+
+      // Filtrar inhumados cuyo aniversario sea en la fecha objetivo
       const inhumadosWithAnniversary = allInhumados.filter((inhumado) => {
-        // Extraer día y mes de la fecha de fallecimiento (asumiendo formato: "DD de Mes de YYYY")
-        const ffal = inhumado.ffal;
-        const ffal_parts = ffal.split(' de ');
+        try {
+          // Validar que exista ffal
+          if (!inhumado.ffal) {
+            this.logger.warn(
+              `Inhumado ID ${inhumado.id} sin fecha de fallecimiento`,
+            );
+            return false;
+          }
 
-        if (ffal_parts.length >= 3) {
+          // Extraer día y mes de la fecha de fallecimiento
+          const ffal = inhumado.ffal;
+          const ffal_parts = ffal.split(' de ');
+
+          if (ffal_parts.length < 3) {
+            this.logger.warn(
+              `Formato de fecha inválido para inhumado ID ${inhumado.id}: ${ffal}`,
+            );
+            return false;
+          }
+
           const day = parseInt(ffal_parts[0], 10);
-          let month = 0;
+          if (isNaN(day)) {
+            this.logger.warn(
+              `Día inválido para inhumado ID ${inhumado.id}: ${ffal_parts[0]}`,
+            );
+            return false;
+          }
 
           // Convertir nombre del mes a número
           const monthName = ffal_parts[1].toLowerCase();
@@ -90,11 +131,22 @@ export class ReminderService {
             diciembre: 12,
           };
 
-          month = months[monthName] || 0;
+          const month = months[monthName] || 0;
+          if (month === 0) {
+            this.logger.warn(
+              `Mes inválido para inhumado ID ${inhumado.id}: ${monthName}`,
+            );
+            return false;
+          }
 
           return day === targetDay && month === targetMonth;
+        } catch (error) {
+          this.logger.error(
+            `Error al procesar fecha para inhumado ID ${inhumado.id}:`,
+            error,
+          );
+          return false;
         }
-        return false;
       });
 
       this.logger.log(
@@ -121,14 +173,21 @@ export class ReminderService {
           );
 
           for (const user of usersWhoWantReminders) {
-            await this.emailService.sendAnniversaryReminderEmail(
-              user.email,
-              user.nombre,
-              inhumado.nombre + ' ' + inhumado.apellido,
-              inhumado.ffal,
-              anniversaryYears,
-              daysAhead,
-            );
+            try {
+              await this.emailService.sendAnniversaryReminderEmail(
+                user.email,
+                user.nombre,
+                inhumado.nombre + ' ' + inhumado.apellido,
+                inhumado.ffal,
+                anniversaryYears,
+                daysAhead,
+              );
+              this.logger.log(`Correo de aniversario enviado a ${user.email}`);
+            } catch (error) {
+              this.logger.error(
+                `Error al enviar correo de aniversario a ${user.email}: ${error.message}`,
+              );
+            }
           }
         }
       }
@@ -216,6 +275,32 @@ export class ReminderService {
           this.logger.log('Usando resultados de la consulta alternativa');
 
           for (const user of alternativeUsers) {
+            try {
+              const fechaPago =
+                user.fechaPago instanceof Date
+                  ? user.fechaPago
+                  : new Date(user.fechaPago);
+
+              await this.emailService.sendPaymentReminderEmail(
+                user.email,
+                user.nombre,
+                fechaPago,
+                daysAhead,
+              );
+              this.logger.log(
+                `Correo de recordatorio de pago enviado a ${user.email}`,
+              );
+            } catch (error) {
+              this.logger.error(
+                `Error al enviar recordatorio de pago a ${user.email}: ${error.message}`,
+              );
+            }
+          }
+        }
+      } else {
+        // Ejecutar el código original si se encontraron usuarios
+        for (const user of usersWithPaymentDue) {
+          try {
             const fechaPago =
               user.fechaPago instanceof Date
                 ? user.fechaPago
@@ -227,22 +312,14 @@ export class ReminderService {
               fechaPago,
               daysAhead,
             );
+            this.logger.log(
+              `Correo de recordatorio de pago enviado a ${user.email}`,
+            );
+          } catch (error) {
+            this.logger.error(
+              `Error al enviar recordatorio de pago a ${user.email}: ${error.message}`,
+            );
           }
-        }
-      } else {
-        // Ejecutar el código original si se encontraron usuarios
-        for (const user of usersWithPaymentDue) {
-          const fechaPago =
-            user.fechaPago instanceof Date
-              ? user.fechaPago
-              : new Date(user.fechaPago);
-
-          await this.emailService.sendPaymentReminderEmail(
-            user.email,
-            user.nombre,
-            fechaPago,
-            daysAhead,
-          );
         }
       }
     } catch (error) {

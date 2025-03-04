@@ -19,24 +19,44 @@ export class EmailService {
       },
     });
 
-    // Verificar la conexión al iniciar
-    // this.verifyConnection().catch((error) => {
-    //   this.logger.error('Error al conectar con servidor de correo:', error);
-    //   throw new InternalServerErrorException(
-    //     'Error al configurar el servicio de correo',
-    //   );
-    // });
+    //Verificar la conexión al iniciar
+    this.verifyConnection().catch((error) => {
+      this.logger.error('Error al conectar con servidor de correo:', error);
+      throw new InternalServerErrorException(
+        'Error al configurar el servicio de correo',
+      );
+    });
   }
 
   private async verifyConnection() {
     try {
       await this.transporter.verify();
       this.logger.log('Conexión con servidor de correo establecida');
+      return true;
     } catch (error) {
-      this.logger.error('Error al conectar con servidor de correo:', error);
-      throw new InternalServerErrorException(
-        'Error al configurar el servicio de correo',
-      );
+      // Manejo más específico de errores
+      if (error.code === 'EAUTH') {
+        this.logger.error(
+          'Error de autenticación con el servidor de correo:',
+          error,
+        );
+        throw new InternalServerErrorException(
+          'Error de autenticación con el servidor de correo. Verifique las credenciales.',
+        );
+      } else if (error.code === 'ESOCKET' || error.code === 'ECONNECTION') {
+        this.logger.error(
+          'Error de conexión con el servidor de correo:',
+          error,
+        );
+        throw new InternalServerErrorException(
+          'No se pudo establecer conexión con el servidor de correo. Verifique su configuración de red.',
+        );
+      } else {
+        this.logger.error('Error al conectar con servidor de correo:', error);
+        throw new InternalServerErrorException(
+          'Error al configurar el servicio de correo: ' + error.message,
+        );
+      }
     }
   }
 
