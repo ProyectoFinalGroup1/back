@@ -82,6 +82,7 @@ export class AuthService {
       token,
       iat: new Date(decodedToken.iat * 1000),
       exp: new Date(decodedToken.exp * 1000),
+      userExisting
     };
   }
 }
