@@ -15,81 +15,28 @@ async function bootstrap() {
   });
 
   // Configuración de CSP usando Helmet
+  app.use((req, res, next) => {
+    res.header(
+      'Content-Security-Policy',
+      `
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: mercadopago.com.br *.mercadopago.com.br mercadopago.com *.mercadopago.com mercadopago.com.co *.mercadopago.com.co js-agent.newrelic.com *.js-agent.newrelic.com siteintercept.qualtrics.com *.siteintercept.qualtrics.com http2.mlstatic.com *.http2.mlstatic.com googletagmanager.com *.googletagmanager.com google.com *.google.com www.google.com mercadopago.cl *.mercadopago.cl mercadopago.com.mx *.mercadopago.com.mx hotjar.com *.hotjar.com mercadopago.com.pe *.mercadopago.com.pe mercadopago.com.uy *.mercadopago.com.uy mercadopago.com.ar *.mercadopago.com.ar static.hotjar.com *.static.hotjar.com mercadopago.com.ve *.mercadopago.com.ve newrelic.com *.newrelic.com www.gstatic.com gstatic.com *.gstatic.com recaptcha.google.com *.recaptcha.google.com www.recaptcha.google.com;
+      connect-src 'self' mercadopago.com *.mercadopago.com api.mercadopago.com google.com *.google.com gstatic.com *.gstatic.com www.gstatic.com recaptcha.google.com *.recaptcha.google.com www.recaptcha.google.com apis.google.com *.apis.google.com http2.mlstatic.com *.http2.mlstatic.com;
+      frame-src 'self' mercadopago.com *.mercadopago.com recaptcha.google.com *.recaptcha.google.com www.recaptcha.google.com google.com *.google.com www.google.com http2.mlstatic.com *.http2.mlstatic.com;
+      img-src 'self' data: mercadopago.com *.mercadopago.com google.com *.google.com gstatic.com *.gstatic.com;
+      style-src 'self' 'unsafe-inline' mercadopago.com *.mercadopago.com google.com *.google.com gstatic.com *.gstatic.com;
+      font-src 'self' data: mercadopago.com *.mercadopago.com gstatic.com *.gstatic.com;
+    `
+        .replace(/\s+/g, ' ')
+        .trim(),
+    );
+    next();
+  });
+
+  // Puedes mantener Helmet para otras configuraciones de seguridad
   app.use(
-    helmet.contentSecurityPolicy({
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          "'unsafe-eval'",
-          'blob:',
-          'mercadopago.com.br',
-          '*.mercadopago.com.br',
-          'mercadopago.com',
-          '*.mercadopago.com',
-          'mercadopago.com.co',
-          '*.mercadopago.com.co',
-          'js-agent.newrelic.com',
-          '*.js-agent.newrelic.com',
-          'siteintercept.qualtrics.com',
-          '*.siteintercept.qualtrics.com',
-          'http2.mlstatic.com',
-          '*.http2.mlstatic.com',
-          'googletagmanager.com',
-          '*.googletagmanager.com',
-          'google.com',
-          '*.google.com',
-          'mercadopago.cl',
-          '*.mercadopago.cl',
-          'mercadopago.com.mx',
-          '*.mercadopago.com.mx',
-          'hotjar.com',
-          '*.hotjar.com',
-          'mercadopago.com.pe',
-          '*.mercadopago.com.pe',
-          'mercadopago.com.uy',
-          '*.mercadopago.com.uy',
-          'mercadopago.com.ar',
-          '*.mercadopago.com.ar',
-          'static.hotjar.com',
-          '*.static.hotjar.com',
-          'mercadopago.com.ve',
-          '*.mercadopago.com.ve',
-          'newrelic.com',
-          '*.newrelic.com',
-          // Agregar los dominios faltantes para reCAPTCHA
-          'www.gstatic.com',
-          'gstatic.com',
-          '*.gstatic.com',
-          'recaptcha.google.com',
-          '*.recaptcha.google.com',
-        ],
-        connectSrc: [
-          "'self'",
-          'mercadopago.com',
-          '*.mercadopago.com',
-          'api.mercadopago.com',
-        ],
-        frameSrc: [
-          "'self'",
-          'mercadopago.com',
-          '*.mercadopago.com',
-          'recaptcha.google.com',
-          '*.recaptcha.google.com',
-          'google.com',
-          '*.google.com',
-        ],
-        imgSrc: ["'self'", 'data:', 'mercadopago.com', '*.mercadopago.com'],
-        styleSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          'mercadopago.com',
-          '*.mercadopago.com',
-        ],
-        fontSrc: ["'self'", 'data:', 'mercadopago.com', '*.mercadopago.com'],
-      },
-      reportOnly: false, // Cambiar a false para aplicar la política en lugar de solo reportar
+    helmet({
+      contentSecurityPolicy: false, // Deshabilita la CSP de Helmet ya que la configuramos manualmente
     }),
   );
 

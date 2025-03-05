@@ -147,44 +147,51 @@ export class userService {
 
   async updateImgPerfil(
     file: Express.Multer.File,
-    userId: string
+    userId: string,
   ): Promise<{ imageUrl: string }> {
     // Verificar si el archivo es válido
     if (!file || !file.buffer) {
-      throw new BadRequestException('No se ha proporcionado un archivo válido.');
+      throw new BadRequestException(
+        'No se ha proporcionado un archivo válido.',
+      );
     }
-  
+
     // Buscar el usuario en la base de datos
     const user = await this.userRepository.findOneBy({ idUser: userId });
-  
+
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
     }
-  
+
     // Subir la nueva imagen a Cloudinary
     let result: CloudinaryResponse;
     try {
       result = await new Promise<CloudinaryResponse>((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           { folder: 'users' },
-          (error: UploadApiErrorResponse | undefined, result: UploadApiResponse) => {
+          (
+            error: UploadApiErrorResponse | undefined,
+            result: UploadApiResponse,
+          ) => {
             if (error) return reject(new Error(error.message));
             resolve(result);
-          }
+          },
         );
-  
+
         const buffer = Buffer.from(file.buffer);
         uploadStream.end(buffer);
       });
     } catch (error) {
-      throw new Error(`Error al subir la imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      throw new Error(
+        `Error al subir la imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+      );
     }
-  
+
     // Verificar que Cloudinary devuelva la URL correcta
     if (!result.secure_url || !result.public_id) {
       throw new Error('Error en la respuesta de Cloudinary.');
     }
-  
+
     // **Eliminar imagen anterior si existe**
     if (user.imagenUrl) {
       const publicId = user.imagenUrl.split('/').pop()?.split('.')[0]; // Extrae el ID de la imagen anterior
@@ -196,11 +203,11 @@ export class userService {
         }
       }
     }
-  
+
     // Guardar la nueva URL de la imagen en el usuario
     user.imagenUrl = result.secure_url;
     await this.userRepository.save(user);
-  
+
     return { imageUrl: result.secure_url };
   }
 }

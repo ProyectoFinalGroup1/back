@@ -162,9 +162,17 @@ export class DonacionService {
 
           // Obtener URL base o usar una por defecto
           const appBaseUrl = process.env.APP_URL || 'http://localhost:3000';
-          console.log('URL BASE PARA callbacks:', appBaseUrl);
+          // Usar BACKEND_URL para las notificaciones de webhook
+          const backendUrl = process.env.BACKEND_URL || appBaseUrl;
+
+          console.log('URL BASE PARA callbacks frontend:', appBaseUrl);
+          console.log('URL BASE PARA webhook backend:', backendUrl);
 
           console.log('CREANDO OBJETO DE PREFERENCIA PARA API DE MERCADOPAGO');
+
+          // Aseguramos que el DNI sea una cadena de texto
+          const dniAsString = findUser.dni ? String(findUser.dni) : '';
+
           const preferenceData = {
             items: [
               {
@@ -180,6 +188,10 @@ export class DonacionService {
               email: email,
               name: findUser.nombre || '',
               surname: findUser.apellido || '',
+              identification: {
+                type: 'DNI',
+                number: dniAsString, // Ahora es garantizado string
+              },
             },
             back_urls: {
               success: `${appBaseUrl}/donacion/success`,
@@ -189,7 +201,7 @@ export class DonacionService {
             auto_return: 'approved',
             statement_descriptor: 'Donación Capilla',
             external_reference: findUser.idUser.toString(),
-            notification_url: `${appBaseUrl}/mercadopago/webhook`,
+            notification_url: `${backendUrl}/mercadopago/webhook`,
           };
 
           console.log(
@@ -252,7 +264,35 @@ export class DonacionService {
             mercadoPagoError.message,
           );
           console.log('Stack de error de MercadoPago:', mercadoPagoError.stack);
-          throw mercadoPagoError;
+
+          // Información detallada de error para debugging
+          if (mercadoPagoError.response && mercadoPagoError.response.data) {
+            console.log(
+              'Respuesta de error MercadoPago:',
+              JSON.stringify(mercadoPagoError.response.data),
+            );
+          }
+
+          // Manejo específico según el tipo de error
+          if (
+            mercadoPagoError.message &&
+            mercadoPagoError.message.includes('token')
+          ) {
+            throw new BadRequestException(
+              'Error de autenticación con Mercado Pago. Verifique el token de acceso.',
+            );
+          } else if (
+            mercadoPagoError.message &&
+            mercadoPagoError.message.includes('request')
+          ) {
+            throw new BadRequestException(
+              'Error en la solicitud a Mercado Pago. Verifique los datos enviados.',
+            );
+          } else {
+            throw new BadRequestException(
+              `Error en Mercado Pago: ${mercadoPagoError.message}`,
+            );
+          }
         }
       } catch (userError) {
         console.log('ERROR AL BUSCAR USUARIO:', userError.message);
@@ -266,9 +306,16 @@ export class DonacionService {
             'DETALLES DE LA ENTIDAD QUE CAUSA PROBLEMAS:',
             userError.message,
           );
+          throw new BadRequestException(
+            'Error con la entidad de usuario. Contacte al administrador.',
+          );
+        } else if (userError instanceof NotFoundException) {
+          throw userError; // Reenviar errores de usuario no encontrado
+        } else {
+          throw new BadRequestException(
+            `Error al buscar usuario: ${userError.message}`,
+          );
         }
-
-        throw userError;
       }
     } catch (generalError) {
       console.log('Error general en payMP:', generalError.message);
@@ -289,135 +336,237 @@ export class DonacionService {
         );
       }
 
-      throw new BadRequestException(
-        `Error al procesar el pago: ${generalError.message}`,
-      );
+      // Mejorar los mensajes de error para el usuario final
+      if (generalError instanceof NotFoundException) {
+        throw new NotFoundException(
+          generalError.message || 'No se encontró el usuario especificado',
+        );
+      } else if (generalError instanceof BadRequestException) {
+        throw generalError; // Ya es un BadRequestException, lo pasamos tal cual
+      } else {
+        throw new BadRequestException(
+          `Error al procesar el pago: ${generalError.message || 'Error desconocido'}`,
+        );
+      }
     }
   }
-
-  // Webhook para recibir notificaciones de Mercado Pago
   async handleWebhook(data: any) {
     this.logger.log(`Webhook recibido: ${JSON.stringify(data)}`);
-
+    console.log('WEBHOOK RECIBIDO:', JSON.stringify(data));
     try {
-      // Verificar si es una notificación de pago
-      if (data.type === 'payment') {
-        const paymentId = data.data.id;
+      // Verificar el tipo de notificación
+      if (!data || (!data.type && !data.action)) {
+        this.logger.warn('Webhook sin tipo de notificación válido');
+        console.log('WEBHOOK SIN TIPO DE NOTIFICACION VALIDO');
+        return {
+          success: true,
+          message: 'Notificación recibida pero sin tipo válido',
+        };
+      }
 
-        // Consultar el estado del pago
-        const mp = new Payment(
-          new MercadoPagoConfig({
-            accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
-          }),
-        );
+      // Mercado Pago puede enviar diferentes formatos de webhook
+      // 1. Notificación IPN: { type: 'payment', data: { id: '123456789' } }
+      // 2. Notificación Webhook: { action: 'payment.created', data: { id: '123456789' } }
 
-        const paymentInfo = await mp.get({ id: paymentId });
-        this.logger.log(`Información del pago: ${JSON.stringify(paymentInfo)}`);
+      let paymentId: string | null = null;
 
-        // En pagos con preference, necesitamos buscar por external_reference
-        const externalReference = paymentInfo.external_reference;
+      if (data.type === 'payment' && data.data && data.data.id) {
+        paymentId = data.data.id.toString();
+        console.log('ID DE PAGO RECIBIDO:', paymentId);
+      } else if (
+        data.action &&
+        data.action.startsWith('payment.') &&
+        data.data &&
+        data.data.id
+      ) {
+        paymentId = data.data.id.toString();
+      }
 
-        // Obtener los datos adicionales del pago como objeto para acceder a campos no tipados
-        const paymentData = paymentInfo as any;
+      if (!paymentId) {
+        this.logger.warn('Webhook sin ID de pago válido');
+        console.log('WEBHOOK SIN ID DE PAGO VALIDO');
+        return { success: true, message: 'Notificación sin ID de pago válido' };
+      }
 
-        // Buscar la donación relacionada (primero por transactionId)
-        let donacion = await this.donacionRepository.findOne({
-          where: { transactionId: paymentId.toString() },
+      this.logger.log(`Procesando pago ID: ${paymentId}`);
+      console.log('PROCESANDO PAGO ID:', paymentId);
+
+      // Consultar el estado del pago
+      const mp = new Payment(
+        new MercadoPagoConfig({
+          accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
+        }),
+      );
+
+      const paymentInfo = await mp.get({ id: paymentId });
+      this.logger.log(`Información del pago: ${JSON.stringify(paymentInfo)}`);
+      console.log('INFORMACION DEL PAGO:', JSON.stringify(paymentInfo));
+
+      // Información adicional que podemos necesitar
+      const paymentData = paymentInfo as any;
+      const preferenceId = paymentData.preference_id || null;
+      const externalReference = paymentInfo.external_reference || null;
+      const status = paymentInfo.status || null;
+
+      this.logger.log(
+        `Detalles: preferenceId=${preferenceId}, externalRef=${externalReference}, status=${status}`,
+      );
+      console.log(
+        'DETALLES ADICIONALES:',
+        `preferenceId=${preferenceId}, externalRef=${externalReference}, status=${status}`,
+      );
+
+      // Estrategia para buscar la donación:
+      // 1. Primero intentamos por transactionId = paymentId
+      // 2. Si no funciona, buscamos por transactionId = preferenceId
+      // 3. Si aún no funciona, buscamos por el ID del usuario (external_reference)
+
+      let donacion: Donacion | null = null;
+
+      // Buscar la donación por paymentId
+      if (paymentId) {
+        donacion = await this.donacionRepository.findOne({
+          where: { transactionId: paymentId },
           relations: ['DonacionUser'],
         });
 
-        // Si no encontramos por paymentId, intentamos buscar por preference_id si está disponible
-        if (!donacion && paymentData.preference_id) {
-          donacion = await this.donacionRepository.findOne({
-            where: { transactionId: paymentData.preference_id },
-            relations: ['DonacionUser'],
-          });
+        if (donacion) {
+          this.logger.log(
+            `Donación encontrada por paymentId: ${donacion.idDonacion}`,
+          );
         }
+      }
 
-        // Si aún no lo encontramos, buscar por el ID del usuario en external_reference
-        if (!donacion && externalReference) {
+      // Si no se encontró por paymentId, buscar por preferenceId
+      if (!donacion && preferenceId) {
+        donacion = await this.donacionRepository.findOne({
+          where: { transactionId: preferenceId },
+          relations: ['DonacionUser'],
+        });
+
+        if (donacion) {
+          this.logger.log(
+            `Donación encontrada por preferenceId: ${donacion.idDonacion}`,
+          );
+        }
+      }
+
+      // Si aún no se encontró, buscar por external_reference (userId)
+      if (!donacion && externalReference) {
+        try {
           const user = await this.userRepository.findOne({
             where: { idUser: externalReference },
           });
 
           if (user) {
-            // Buscar la donación más reciente de este usuario que esté pendiente
-            donacion = await this.donacionRepository.findOne({
+            // Buscar donaciones pendientes de este usuario
+            const donacionesPendientes = await this.donacionRepository.find({
               where: { DonacionUser: { idUser: user.idUser }, Estado: false },
               relations: ['DonacionUser'],
               order: { Date: 'DESC' },
             });
-          }
-        }
 
-        if (donacion) {
-          // Actualizar datos de la donación
-          const estadoAnterior = donacion.Estado;
-          const nuevoEstado = paymentInfo.status === 'approved';
-
-          // Actualizar método de pago y estado
-          donacion.metodoPago = paymentInfo.payment_method_id || '';
-
-          // Actualizamos el transactionId para que apunte al pago real
-          if (donacion.transactionId !== paymentId.toString()) {
-            this.logger.log(
-              `Actualizando transactionId de ${donacion.transactionId} a ${paymentId}`,
-            );
-            // Guardamos el preference_id en algún otro lugar si es necesario
-            donacion.transactionId = paymentId.toString();
-          }
-
-          // Solo actualizar si hay cambio de estado
-          if (estadoAnterior !== nuevoEstado) {
-            donacion.Estado = nuevoEstado;
-            await this.donacionRepository.save(donacion);
-            this.logger.log(
-              `Estado de donación actualizado: ${donacion.idDonacion} - ${nuevoEstado}`,
-            );
-
-            // Si el pago pasó de pendiente a aprobado, enviar correo
-            if (!estadoAnterior && nuevoEstado) {
-              await this.emailService.sendDonationThankYouEmail(
-                donacion.DonacionUser.email,
-                donacion.nombreMostrar ||
-                  donacion.DonacionUser.nombre ||
-                  'Donante',
-                donacion.monto,
-                donacion.Date,
-              );
-            } else {
-              // Enviar correo de actualización de estado
-              await this.emailService.sendDonationStatusUpdateEmail(
-                donacion.DonacionUser.email,
-                donacion.nombreMostrar ||
-                  donacion.DonacionUser.nombre ||
-                  'Donante',
-                donacion.monto,
-                nuevoEstado ? 'aprobado' : 'rechazado',
+            if (donacionesPendientes.length > 0) {
+              // Tomamos la más reciente
+              donacion = donacionesPendientes[0];
+              this.logger.log(
+                `Donación encontrada por userId: ${donacion.idDonacion}`,
               );
             }
           }
-        } else {
-          this.logger.warn(
-            `No se encontró donación relacionada con el pago ${paymentId} (user: ${externalReference})`,
-          );
+        } catch (error) {
+          this.logger.error(`Error al buscar por userId: ${error.message}`);
         }
-
-        return {
-          success: true,
-          message: 'Notificación procesada correctamente',
-        };
       }
 
-      return { success: true, message: 'Notificación recibida' };
+      if (donacion) {
+        // Actualizar datos de la donación
+        const estadoAnterior = donacion.Estado;
+        // Mercado Pago considera aprobado solo con status = 'approved'
+        const nuevoEstado = status === 'approved';
+
+        // Actualizamos método de pago
+        donacion.metodoPago =
+          paymentInfo.payment_method_id ||
+          paymentInfo.payment_type_id ||
+          'desconocido';
+
+        // Si encontramos por preferenceId, actualizar el transactionId al paymentId
+        if (donacion.transactionId !== paymentId) {
+          this.logger.log(
+            `Actualizando transactionId: ${donacion.transactionId} → ${paymentId}`,
+          );
+          donacion.transactionId = paymentId;
+        }
+
+        // Solo actualizar el estado si hay un cambio
+        if (estadoAnterior !== nuevoEstado) {
+          donacion.Estado = nuevoEstado;
+
+          try {
+            await this.donacionRepository.save(donacion);
+            this.logger.log(
+              `Estado de donación actualizado: ${donacion.idDonacion} - ${nuevoEstado ? 'Aprobado' : 'No aprobado'}`,
+            );
+
+            // Enviar email según corresponda
+            if (donacion.DonacionUser && donacion.DonacionUser.email) {
+              if (!estadoAnterior && nuevoEstado) {
+                await this.emailService.sendDonationThankYouEmail(
+                  donacion.DonacionUser.email,
+                  donacion.nombreMostrar ||
+                    donacion.DonacionUser.nombre ||
+                    'Donante',
+                  donacion.monto,
+                  donacion.Date,
+                );
+                this.logger.log(
+                  `Email de agradecimiento enviado a ${donacion.DonacionUser.email}`,
+                );
+              } else {
+                await this.emailService.sendDonationStatusUpdateEmail(
+                  donacion.DonacionUser.email,
+                  donacion.nombreMostrar ||
+                    donacion.DonacionUser.nombre ||
+                    'Donante',
+                  donacion.monto,
+                  nuevoEstado ? 'aprobado' : 'rechazado',
+                );
+                this.logger.log(
+                  `Email de actualización enviado a ${donacion.DonacionUser.email}`,
+                );
+              }
+            }
+          } catch (error) {
+            this.logger.error(`Error al guardar donación: ${error.message}`);
+            throw error;
+          }
+        } else {
+          this.logger.log(
+            `No hay cambio de estado para la donación ${donacion.idDonacion}`,
+          );
+        }
+      } else {
+        this.logger.warn(
+          `No se encontró donación relacionada con el pago ${paymentId} (preferenceId: ${preferenceId}, user: ${externalReference})`,
+        );
+      }
+
+      return {
+        success: true,
+        message: 'Notificación procesada correctamente',
+      };
     } catch (error) {
       this.logger.error(
         `Error al procesar la notificación: ${error.message}`,
         error.stack,
       );
-      throw new BadRequestException(
-        `Error al procesar la notificación: ${error.message}`,
-      );
+      // No lanzamos una excepción para evitar que Mercado Pago reintente enviar la notificación
+      // En su lugar, devolvemos un 200 con un mensaje de error
+      return {
+        success: false,
+        message: `Error al procesar la notificación: ${error.message}`,
+      };
     }
   }
 }
