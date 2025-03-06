@@ -11,7 +11,6 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
-  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -29,14 +28,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class PublicacionesController {
   constructor(private readonly publicacionesService: PublicacionesService) {}
 
-  //admin
+  //ADMINISTRADOR
   @Get('pendientes')
   async publicacionesPendientes() {
     return await this.publicacionesService.pendientes();
   }
 
   @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard) // Solo admin
+  @UseGuards(AuthGuard, RolesGuard)
   @Get('')
   async allPublicaciones() {
     return this.publicacionesService.allPublication();
@@ -104,15 +103,39 @@ export class PublicacionesController {
   }
 
   @UseGuards(AuthGuard)
-  @Put('editar/:id')
+  @Patch('editar/:id')
   @ApiOperation({ summary: 'Editar una publicación' })
   async updatePublicacion(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() publicacionDto: Partial<CreatePublicacionDto>,
+    @UploadedFile(
+      //=>Cloudinary parametros que requirer
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 200000000,
+            message: 'El tamaño de la imagen debe ser inferior a 200MB',
+          }),
+          new FileTypeValidator({
+            fileType: /^(image\/jpeg|image\/png)$/,
+          }),
+        ],
+      }),
+    )
+    file: Express.Multer.File | undefined,
+    @Body() newPublicacion: Partial<CreatePublicacionDto>,
   ) {
-    return await this.publicacionesService.updatePublicacion(
+    let ImgCloudinary: string | null = null;
+    if (file) {
+      ImgCloudinary = await this.publicacionesService.uploadImage(file);
+    }
+    const editPublicacion = await this.publicacionesService.updatePublicacion(
       id,
-      publicacionDto,
+      newPublicacion,
+      ImgCloudinary,
     );
+    return {
+      message: 'Publicacion modificada a la espera de su aprobacion',
+      editPublicacion,
+    };
   }
 }
