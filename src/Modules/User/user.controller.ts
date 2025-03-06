@@ -63,6 +63,15 @@ export class UserController {
     return await this.userService.userFind(id);
   }
 
+  //Administrador
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Get('datos/:id')
+  async UserAllAdmin(@Param('id') id: string) {
+    const UserAll = await this.userService.allUserAdmin(id);
+    return UserAll;
+  }
+
   @Patch(':id/preferences')
   @UseGuards(AuthGuard)
   @ApiOperation({
@@ -88,7 +97,7 @@ export class UserController {
   })
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
-  @Put(':id')
+  @Patch('datos/:id')
   async UpdateUser(
     @Param('id') idUser: string,
     @Body() dataUser: Partial<User>,
@@ -108,7 +117,7 @@ export class UserController {
   })
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
-  @Delete(':id')
+  @Delete('datos/:id')
   async deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }

@@ -40,6 +40,14 @@ export class User {
   dni: number;
 
   @ApiProperty({
+    description: 'Nro de telefono del usuario',
+    example: 12345678,
+    uniqueItems: true,
+  })
+  @Column({ type: 'int', nullable: true })
+  phoneNumber: number;
+
+  @ApiProperty({
     description: 'Correo electrónico del usuario',
     example: 'juan.perez@email.com',
     maxLength: 50,
@@ -78,7 +86,7 @@ export class User {
     example: '********',
     maxLength: 100,
   })
-  @Column({ type: 'varchar', length: 100, nullable: false })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   password: string;
 
   @ApiProperty({

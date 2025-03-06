@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { Publicacion } from 'src/Entities/publicaciones.entity';
 import { Inhumado } from 'src/Entities/inhumados.entity';
 import { User } from 'src/Entities/user.entity';
-import { CreatePublicacionDto } from '../DTO/publicacionDto';
+// import { CreatePublicacionDto } from '../DTO/publicacionDto';
 import { v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
@@ -146,26 +146,17 @@ export class PublicacionesRepository {
     };
   }
 
-  async updatePublicacion(
-    id: string,
-    publicacionDto: Partial<CreatePublicacionDto>,
-  ) {
+  async updatePublicacion(id: string, mensaje: string) {
     const publicacion = await this.publicacionesRepository.findOneBy({ id });
 
     if (!publicacion) {
       throw new NotFoundException('Publicación no encontrada');
     }
 
-    if (publicacion.aprobada) {
-      throw new BadRequestException(
-        'No se puede editar una publicación aprobada',
-      );
-    }
+    publicacion.mensaje = mensaje;
+    publicacion.aprobada = false;
 
-    await this.publicacionesRepository.update(id, publicacionDto);
-    const updatePublicacion = await this.publicacionesRepository.findOneBy({
-      id,
-    });
-    return updatePublicacion?.id;
+    await this.publicacionesRepository.save(publicacion);
+    return 'EN PROCESO';
   }
 }
