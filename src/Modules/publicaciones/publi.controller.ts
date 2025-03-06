@@ -107,8 +107,35 @@ export class PublicacionesController {
   @ApiOperation({ summary: 'Editar una publicación' })
   async updatePublicacion(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() mensaje: string,
+    @UploadedFile(
+      //=>Cloudinary parametros que requirer
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 200000000,
+            message: 'El tamaño de la imagen debe ser inferior a 200MB',
+          }),
+          new FileTypeValidator({
+            fileType: /^(image\/jpeg|image\/png)$/,
+          }),
+        ],
+      }),
+    )
+    file: Express.Multer.File | undefined,
+    @Body() newPublicacion: Partial<CreatePublicacionDto>,
   ) {
-    return await this.publicacionesService.updatePublicacion(id, mensaje);
+    let ImgCloudinary: string | null = null;
+    if (file) {
+      ImgCloudinary = await this.publicacionesService.uploadImage(file);
+    }
+    const editPublicacion = await this.publicacionesService.updatePublicacion(
+      id,
+      newPublicacion,
+      ImgCloudinary,
+    );
+    return {
+      message: 'Publicacion modificada a la espera de su aprobacion',
+      editPublicacion,
+    };
   }
 }

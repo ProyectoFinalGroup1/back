@@ -146,17 +146,22 @@ export class PublicacionesRepository {
     };
   }
 
-  async updatePublicacion(id: string, mensaje: string) {
+  async updatePublicacion(id: string, newPublicacion, ImgCloudinary) {
     const publicacion = await this.publicacionesRepository.findOneBy({ id });
 
     if (!publicacion) {
       throw new NotFoundException('Publicación no encontrada');
     }
-
-    publicacion.mensaje = mensaje;
+    publicacion.mensaje = newPublicacion.mensaje;
     publicacion.aprobada = false;
+    if (ImgCloudinary !== null) {
+      publicacion.imagen = ImgCloudinary;
+    }
+    const result = await this.publicacionesRepository.update(id, publicacion);
+    if (result.affected === 0) {
+      throw new BadRequestException('Hubo un error al cargar los datos');
+    }
 
-    await this.publicacionesRepository.save(publicacion);
-    return 'EN PROCESO';
+    return 'Publicacion modificado con exito a la espera de su confirmacion';
   }
 }
