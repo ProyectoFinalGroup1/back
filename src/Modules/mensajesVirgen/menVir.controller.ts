@@ -75,10 +75,7 @@ export class MensajesVirgenController {
       mensajeVirgen,
       ImgCloudinary,
     );
-    return {
-      message: 'Publicacion creada con exito a la espera de su aprobacion',
-      newMsjVirgen,
-    };
+    return newMsjVirgen;
   }
 
   @Roles(Role.Admin)
