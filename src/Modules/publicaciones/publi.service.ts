@@ -51,8 +51,12 @@ export class PublicacionesService {
     return this.publicacionesRepository.allPub();
   }
 
-  async updatePublicacion(id: string, mensaje: string) {
-    return await this.publicacionesRepository.updatePublicacion(id, mensaje);
+  async updatePublicacion(id: string, newPublicacion, ImgCloudinary) {
+    return await this.publicacionesRepository.updatePublicacion(
+      id,
+      newPublicacion,
+      ImgCloudinary,
+    );
   }
   ///
 }
