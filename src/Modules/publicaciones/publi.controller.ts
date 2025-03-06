@@ -11,7 +11,6 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
-  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -29,14 +28,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class PublicacionesController {
   constructor(private readonly publicacionesService: PublicacionesService) {}
 
-  //admin
+  //ADMINISTRADOR
   @Get('pendientes')
   async publicacionesPendientes() {
     return await this.publicacionesService.pendientes();
   }
 
   @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard) // Solo admin
+  @UseGuards(AuthGuard, RolesGuard)
   @Get('')
   async allPublicaciones() {
     return this.publicacionesService.allPublication();
@@ -104,15 +103,12 @@ export class PublicacionesController {
   }
 
   @UseGuards(AuthGuard)
-  @Put('editar/:id')
+  @Patch('editar/:id')
   @ApiOperation({ summary: 'Editar una publicación' })
   async updatePublicacion(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() publicacionDto: Partial<CreatePublicacionDto>,
+    @Body() mensaje: string,
   ) {
-    return await this.publicacionesService.updatePublicacion(
-      id,
-      publicacionDto,
-    );
+    return await this.publicacionesService.updatePublicacion(id, mensaje);
   }
 }

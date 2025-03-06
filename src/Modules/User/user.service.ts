@@ -32,11 +32,61 @@ export class userService {
   }
 
   async userFind(id: string): Promise<User | NotFoundException> {
-    const result = await this.userRepository.findOne({ where: { idUser: id } });
+    const result = await this.userRepository.findOne({
+      where: { idUser: id },
+      relations: ['usuario-inhumado', 'inhumados', 'publicaciones'],
+    });
     if (!result) throw new NotFoundException('No se encontro usuario');
     return result;
   }
 
+  //FUNCION USUARIO
+  async allUserAdmin(id: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        idUser: id,
+      },
+      relations: [
+        'publicaciones',
+        'usuarioInhumados',
+        'usuarioInhumados.inhumado',
+        'mensajesAVirgen',
+      ],
+    });
+    if (!user) throw new NotFoundException('No se encontro usuario');
+    return {
+      Usuario: {
+        idUser: user.idUser,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        dni: user.dni,
+        phoneNumber: user.phoneNumber,
+        email: user.email,
+        imagenUrl: user.imagenUrl,
+        fechaPago: user.fechaPago,
+        recibirRecordatoriosAniversarios: user.recibirRecordatoriosAniversarios,
+        isAdmin: user.isAdmin,
+      },
+      publicaciones: user.publicaciones,
+      mensajes: user.mensajesAVirgen,
+      relaciones: user.usuarioInhumados.map((rel) => ({
+        id: rel.inhumado?.id,
+        apellido: rel.inhumado?.apellido,
+        nombre: rel.inhumado?.nombre,
+        fnac: rel.inhumado?.fnac,
+        ffal: rel.inhumado?.ffal,
+        valle: rel.inhumado?.valle,
+        sector: rel.inhumado?.sector,
+        imagenUrl: rel.inhumado?.imagenUrl,
+        manzana: rel.inhumado?.manzana,
+        parcela: rel.inhumado?.parcela,
+        simbolo: rel.inhumado?.simbolo,
+        ncliente: rel.inhumado?.ncliente,
+        usuario_id: rel.usuario?.idUser ?? null,
+      })),
+    };
+  }
+  ////////
   async updateUser(idUser: string, dataUser: Partial<User>): Promise<User> {
     const findUser = await this.userRepository.findOneBy({ idUser });
     if (!findUser) {

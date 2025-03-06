@@ -3,10 +3,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
+import * as morgan from 'morgan';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  app.use(morgan('dev'));
+  app.use(helmet());
   // Habilitar CORS para permitir peticiones desde el frontend en localhost:3001
   app.enableCors({
     origin: ['http://localhost:3001', 'https://deployfront-rouge.vercel.app'],
