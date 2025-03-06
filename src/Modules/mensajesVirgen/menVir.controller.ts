@@ -1,6 +1,5 @@
 import { MensajesVirgenService } from './menVir.service';
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -52,6 +51,7 @@ export class MensajesVirgenController {
   async addMensajeVirgen(
     @UploadedFile(
       new ParseFilePipe({
+        fileIsRequired: false,
         validators: [
           new MaxFileSizeValidator({
             maxSize: 200000000,
@@ -63,23 +63,22 @@ export class MensajesVirgenController {
         ],
       }),
     )
-    file: Express.Multer.File,
+    file: Express.Multer.File | undefined,
     @Body() mensajeVirgen: Partial<MensajeAVirgen>,
   ) {
-    try {
-      const imgCloudinary = await this.mensajesVirgenService.uploadImage(file);
-
-      const newMsjVirgen = await this.mensajesVirgenService.addMensajeVirgen(
-        mensajeVirgen,
-        imgCloudinary,
-      );
-      return {
-        message: 'Publicacion creada con exito a la espera de su aprobacion',
-        newMsjVirgen,
-      };
-    } catch (error) {
-      throw new BadRequestException(error.mensagge);
+    let ImgCloudinary: string | undefined = undefined;
+    if (file) {
+      ImgCloudinary = await this.mensajesVirgenService.uploadImage(file);
     }
+
+    const newMsjVirgen = await this.mensajesVirgenService.addMensajeVirgen(
+      mensajeVirgen,
+      ImgCloudinary,
+    );
+    return {
+      message: 'Publicacion creada con exito a la espera de su aprobacion',
+      newMsjVirgen,
+    };
   }
 
   @Roles(Role.Admin)

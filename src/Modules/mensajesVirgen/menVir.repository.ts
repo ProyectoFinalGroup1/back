@@ -56,7 +56,7 @@ export class MensajesVirgenRepository {
 
   async addMensajeVirgen(
     mensajeVirgen: Partial<MensajeAVirgen>,
-    imgCloudinary: string,
+    imgCloudinary: string | undefined,
   ) {
     const { usuario, texto } = mensajeVirgen;
     const existingUser = await this.userRepository.findOne({

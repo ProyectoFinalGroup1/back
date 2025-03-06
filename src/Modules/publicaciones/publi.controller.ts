@@ -104,12 +104,13 @@ export class PublicacionesController {
 
   @UseGuards(AuthGuard)
   @Patch('editar/:id')
-  @ApiOperation({ summary: 'Editar una publicación' })
+  @ApiOperation({ summary: 'Editar una publicación,' })
   async updatePublicacion(
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile(
       //=>Cloudinary parametros que requirer
       new ParseFilePipe({
+        fileIsRequired: false,
         validators: [
           new MaxFileSizeValidator({
             maxSize: 200000000,
@@ -124,6 +125,13 @@ export class PublicacionesController {
     file: Express.Multer.File | undefined,
     @Body() newPublicacion: Partial<CreatePublicacionDto>,
   ) {
+    if (
+      !newPublicacion ||
+      !newPublicacion.mensaje ||
+      newPublicacion.mensaje.trim() === ''
+    ) {
+      throw new BadRequestException('El mensaje no puede estar vacío');
+    }
     let ImgCloudinary: string | null = null;
     if (file) {
       ImgCloudinary = await this.publicacionesService.uploadImage(file);

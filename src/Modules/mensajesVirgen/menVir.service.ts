@@ -21,7 +21,7 @@ export class MensajesVirgenService {
   }
   addMensajeVirgen(
     mensajeVirgen: Partial<MensajeAVirgen>,
-    imgCloudinary: string,
+    imgCloudinary: string | undefined,
   ) {
     return this.MensajesVirgenRepository.addMensajeVirgen(
       mensajeVirgen,
