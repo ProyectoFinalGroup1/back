@@ -34,6 +34,12 @@ export class AuthService {
     if (!hashPass) {
       throw new BadRequestException('Credenciales no admitidas');
     }
+    const dniExists = await this.userRepository.findOne({
+      where: { dni: dni },
+    });
+    if (dniExists) {
+      throw new BadRequestException('DNI ya registrado');
+    }
 
     const newUser = this.userRepository.create({
       nombre: nombre,
@@ -82,7 +88,7 @@ export class AuthService {
       token,
       iat: new Date(decodedToken.iat * 1000),
       exp: new Date(decodedToken.exp * 1000),
-      userExisting
+      userExisting,
     };
   }
 }
