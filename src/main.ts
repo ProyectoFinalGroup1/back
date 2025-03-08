@@ -12,7 +12,7 @@ async function bootstrap() {
   // Habilitar CORS para permitir peticiones desde el frontend en localhost:3001
   app.enableCors({
     origin: ['http://localhost:3001', 'https://deployfront-rouge.vercel.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
