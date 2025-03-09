@@ -41,7 +41,7 @@ export class PublicacionesController {
     return this.publicacionesService.allPublication();
   }
 
-  @UseGuards(AuthGuard)
+  /*@UseGuards(AuthGuard)*/
   @Post('addPublicacion')
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Agregar un publicacion' })
