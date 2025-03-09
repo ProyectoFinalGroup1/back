@@ -59,8 +59,8 @@ export class InhumadoController {
     return datos;
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard)
+  /*@Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)*/
   @ApiOperation({ summary: 'Agregar un inhumados' })
   @ApiResponse({
     status: 200,
@@ -128,8 +128,9 @@ export class InhumadoController {
     return await this.inhumadosService.getInhumadosByValle(valle);
   }
 
-  @Roles(Role.Admin)
+  /*@Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
+  */
   @Get(':id') // cuiadado posicionamiento
   @ApiOperation({ summary: 'Obtener un inhumado por id' })
   @ApiParam({
