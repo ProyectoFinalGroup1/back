@@ -5,13 +5,15 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/Entities/user.entity';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { UpdateUserPreferencesDto } from '../DTO/UpdateUserPreferencesDto';
 import {
   v2 as cloudinary,
   UploadApiErrorResponse,
   UploadApiResponse,
 } from 'cloudinary';
+import { Donacion } from 'src/Entities/donacion.entity';
+
 interface CloudinaryResponse {
   secure_url: string;
   public_id: string;
@@ -21,6 +23,9 @@ interface CloudinaryResponse {
 export class userService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Donacion)
+    private readonly donacionRepository: Repository<Donacion>,
+    private datasource: DataSource,
   ) {}
 
   async getUsers(): Promise<User[] | NotFoundException> {
@@ -97,17 +102,91 @@ export class userService {
   }
 
   async deleteUser(id: string) {
-    const findUser = await this.userRepository.findOne({
-      where: { idUser: id },
-    });
-    if (!findUser) {
-      throw new NotFoundException('No se encontro usuario');
+    try {
+      const findUser = await this.userRepository.findOne({
+        where: { idUser: id },
+      });
+      if (!findUser) {
+        throw new NotFoundException('No se encontro usuario');
+      }
+      const deleteUser = await this.userRepository.remove(findUser);
+      if (!deleteUser) {
+        throw new BadRequestException('No se pudo eliminar usuario');
+      }
+      return id;
+    } catch (error) {
+      // Verificar si es un error de clave foránea
+      if (error?.code === '23503') {
+        // Verificar a qué tabla hace referencia la restricción
+        if (error?.detail?.includes('donacion')) {
+          throw new BadRequestException(
+            'Este usuario no puede ser eliminado ya que tiene donaciones asociadas. Use la opción "delete-user-with-donations" para eliminarlo junto con sus donaciones.',
+          );
+        } else if (error?.detail?.includes('publicaciones')) {
+          throw new BadRequestException(
+            'Este usuario no puede ser eliminado ya que tiene publicaciones asociadas. Elimine primero las publicaciones del usuario.',
+          );
+        } else if (error?.detail?.includes('inhumado')) {
+          throw new BadRequestException(
+            'Este usuario no puede ser eliminado ya que tiene un inhumado asociado. Elimine primero las asociaciones del usuario.',
+          );
+        } else {
+          // Para cualquier otra restricción de clave foránea
+          throw new BadRequestException(
+            `Este usuario no puede ser eliminado ya que tiene registros asociados en la tabla "${error?.table}". Elimine primero estos registros.`,
+          );
+        }
+      }
+
+      // Si no es un error de clave foránea, vuelve a lanzar el error original
+      throw error;
     }
-    const deleteUser = await this.userRepository.remove(findUser);
-    if (!deleteUser) {
-      throw new BadRequestException('No se pudo eliminar usuario');
+  }
+
+  async deleteUserWithDonations(id: string) {
+    const queryRunner = this.datasource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const findUser = await this.userRepository.findOne({
+        where: { idUser: id },
+      });
+      if (!findUser) {
+        throw new NotFoundException('No se encontro usuario');
+      }
+
+      // Esto es más flexible y funcionará con relaciones
+      const donaciones = await queryRunner.manager.find(Donacion, {
+        where: {
+          DonacionUser: { idUser: id },
+        },
+      });
+
+      // Eliminar cada donación encontrada
+      for (const donacion of donaciones) {
+        await queryRunner.manager.remove(donacion);
+      }
+
+      // Luego elimina el usuario
+      await queryRunner.manager.remove(findUser);
+
+      await queryRunner.commitTransaction();
+      return {
+        success: true,
+        message: `Usuario con id ${id} y sus donaciones relacionadas han sido eliminados`,
+        userId: id,
+      };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      if (err instanceof NotFoundException) {
+        throw new NotFoundException(err.message);
+      }
+      throw new BadRequestException(
+        `No se pudo eliminar el usuario con sus donaciones: ${err.message || 'Error desconocido'}`,
+      );
+    } finally {
+      await queryRunner.release();
     }
-    return id;
   }
 
   // Método para actualizar las preferencias de notificaciones de un usuario

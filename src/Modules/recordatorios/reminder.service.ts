@@ -43,7 +43,7 @@ export class ReminderService {
 
   // Ejecutar todos los días a las 10:00 AM para recordatorios de 1 día antes
   @Cron(CronExpression.EVERY_DAY_AT_10AM)
-  // @Cron('*/5 * * * *') // Se ejecuta cada 5 minutos
+  //@Cron('*/5 * * * *') // Se ejecuta cada 5 minutos
   async sendDailyReminders() {
     try {
       this.logger.log('Iniciando envío de recordatorios diarios...');
