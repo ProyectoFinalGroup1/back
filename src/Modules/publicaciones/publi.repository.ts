@@ -164,4 +164,18 @@ export class PublicacionesRepository {
 
     return 'Publicacion modificado con exito a la espera de su confirmacion';
   }
+
+  async misPublicaciones(id: string) {
+    const user = await this.userRepository.findOne({
+      where: { idUser: id },
+      relations: ['publicaciones'],
+    });
+    if (!user || !user.publicaciones?.length) {
+      throw new NotFoundException(
+        'No se encontraron publicaciones para este usuario',
+      );
+    }
+
+    return user.publicaciones;
+  }
 }

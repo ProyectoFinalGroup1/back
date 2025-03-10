@@ -79,6 +79,11 @@ export class PublicacionesController {
     }
   }
 
+  @Get('misPublicaciones/:id')
+  async misPublicaciones(@Param('id') id: string) {
+    return await this.publicacionesService.misPublicaciones(id);
+  }
+
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard) // Solo admin
   @Patch(':id')
