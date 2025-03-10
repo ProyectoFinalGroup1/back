@@ -169,4 +169,22 @@ export class UserController {
   ) {
     return this.userService.updateImgPerfil(file, userId);
   }
+  @ApiOperation({ summary: 'Eliminar usuario junto con sus donaciones' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'ID del usuario a eliminar con sus donaciones',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario y sus donaciones eliminados exitosamente',
+  })
+
+  //PARA ELIMINAR USUARIOS CON DONACIONES EN BD(rechazadas /en proceso /aprobadas)
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Delete('delete-user-with-donations/:id')
+  async deleteUserWithDonations(@Param('id') id: string) {
+    return this.userService.deleteUserWithDonations(id);
+  }
 }
