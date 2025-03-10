@@ -26,7 +26,7 @@ export class PublicacionesService {
 
   async addPublicacion(
     publicacionDto: CreatePublicacionDto,
-    ImgCloudinary: string,
+    ImgCloudinary: string | undefined,
   ): Promise<string> {
     return await this.publicacionesRepository.addPublicacion(
       publicacionDto,

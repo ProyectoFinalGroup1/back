@@ -19,11 +19,11 @@ export class MensajesVirgenService {
   async uploadImage(file: Express.Multer.File) {
     return await this.MensajesVirgenRepository.uploadImage(file);
   }
-  addMensajeVirgen(
+  async addMensajeVirgen(
     mensajeVirgen: Partial<MensajeAVirgen>,
     imgCloudinary: string | undefined,
   ) {
-    return this.MensajesVirgenRepository.addMensajeVirgen(
+    return await this.MensajesVirgenRepository.addMensajeVirgen(
       mensajeVirgen,
       imgCloudinary,
     );

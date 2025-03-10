@@ -89,7 +89,7 @@ export class PublicacionesRepository {
     nuevaPublicacion.usuario = existingUser;
     nuevaPublicacion.inhumado = existingInhumado;
     nuevaPublicacion.mensaje = mensaje;
-    nuevaPublicacion.imagen = ImgCloudinary || null;
+    nuevaPublicacion.imagen = ImgCloudinary;
     nuevaPublicacion.aprobada = false;
     nuevaPublicacion.fechaPublicacion = new Date();
     const savePublicacion =

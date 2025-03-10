@@ -15,5 +15,5 @@ export class CreatePublicacionDto {
 
   @IsOptional()
   @IsString()
-  imagen?: string;
+  imagen?: string | undefined;
 }

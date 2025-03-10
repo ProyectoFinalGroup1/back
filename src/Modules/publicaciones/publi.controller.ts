@@ -49,6 +49,7 @@ export class PublicacionesController {
     @UploadedFile(
       //=>Cloudinary parametros que requirer
       new ParseFilePipe({
+        fileIsRequired: false,
         validators: [
           new MaxFileSizeValidator({
             maxSize: 200000000,
@@ -60,25 +61,25 @@ export class PublicacionesController {
         ],
       }),
     )
-    file: Express.Multer.File,
+    file: Express.Multer.File | undefined,
     @Body()
     publicacionDto: CreatePublicacionDto,
   ) {
-    try {
-      const ImgCloudinary = await this.publicacionesService.uploadImage(file);
-      const newPublicacion = await this.publicacionesService.addPublicacion(
-        publicacionDto,
-        ImgCloudinary,
-      );
-      return {
-        message: 'Publicacion creada con exito a la espera de su aprobacion',
-        newPublicacion,
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message);
+    let ImgCloudinary: string | undefined = undefined;
+    if (file) {
+      ImgCloudinary = await this.publicacionesService.uploadImage(file);
     }
+    const newPublicacion = await this.publicacionesService.addPublicacion(
+      publicacionDto,
+      ImgCloudinary,
+    );
+    return {
+      message: 'Publicacion creada con exito a la espera de su aprobacion',
+      newPublicacion,
+    };
   }
 
+  /////////// FALTA AGREGAR LOS ROLES Y GUARDS
   @Get('misPublicaciones/:id')
   async misPublicaciones(@Param('id') id: string) {
     return await this.publicacionesService.misPublicaciones(id);
