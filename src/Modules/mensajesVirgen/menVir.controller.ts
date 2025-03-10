@@ -28,10 +28,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class MensajesVirgenController {
   constructor(private readonly mensajesVirgenService: MensajesVirgenService) {}
 
-  @UseGuards(AuthGuard)
   @Get()
   @ApiOperation({
-    summary: 'Obtener los mensajes a la virgen por id del usuario',
+    summary: 'Obtener los mensajes a la virgen',
   })
   async getMensajesVirgen() {
     return await this.mensajesVirgenService.getMensajesVirgen();
