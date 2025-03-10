@@ -58,5 +58,9 @@ export class PublicacionesService {
       ImgCloudinary,
     );
   }
+
+  async misPublicaciones(id: string) {
+    return await this.publicacionesRepository.misPublicaciones(id);
+  }
   ///
 }
