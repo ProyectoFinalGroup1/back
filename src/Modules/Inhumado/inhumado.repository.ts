@@ -87,10 +87,23 @@ export class inhumadosRepository {
   }
 
   async updateInhumado(id: string, inhumado: Partial<Inhumado>) {
-    await this.inhumadosRepository.update(id, inhumado);
-    const updateInhumado = await this.inhumadosRepository.findOneBy({ id });
-    return updateInhumado;
-  }
+    const existingInhumado = await this.inhumadosRepository.findOne({
+        where: { id },
+        relations: ['publicaciones'], // 🔹 Asegurar que traemos las relaciones
+    });
+
+    if (!existingInhumado) {
+        throw new NotFoundException('Inhumado no encontrado');
+    }
+
+    // 🔹 Filtrar datos para evitar actualizar la relación `publicaciones`
+    const { publicaciones, ...updateData } = inhumado;  
+
+    // 🔹 Aplicar solo los cambios permitidos
+    Object.assign(existingInhumado, updateData); 
+
+    return await this.inhumadosRepository.save(existingInhumado);
+}
 
   // Define una interfaz para el resultado de la consulta(se agrega por el error/advertencia de tipado)
 
