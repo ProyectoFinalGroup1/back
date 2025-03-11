@@ -55,18 +55,18 @@ export class MensajesVirgenRepository {
   }
 
   async addMensajeVirgen(
-    mensajeVirgen: Partial<MensajeAVirgen>,
+    id: string,
+    mensajeVirgen: string,
     imgCloudinary: string | undefined,
   ) {
-    const { usuario, texto } = mensajeVirgen;
     const existingUser = await this.userRepository.findOne({
-      where: { idUser: usuario?.idUser },
+      where: { idUser: id },
     });
     if (!existingUser) throw new NotFoundException('No se encontro a Usuario');
-    if (!texto) throw new BadRequestException('Texto invalido');
+    if (!mensajeVirgen) throw new BadRequestException('Texto invalido');
     const newMSJ = new MensajeAVirgen();
     newMSJ.usuario = existingUser;
-    newMSJ.texto = texto;
+    newMSJ.texto = mensajeVirgen;
     newMSJ.fechaPublicacion = new Date();
     newMSJ.imagenUrl = imgCloudinary;
     newMSJ.estado = false;
