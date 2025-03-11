@@ -102,6 +102,13 @@ export class MensajesVirgenRepository {
       usuario: usuarioInfo,
     };
   }
+  //este es solamente para guardar los datos del user y pder enviar el correo para notificarlo q se rechazo su publicacion a la virgen
+  async getMensajeConUsuario(id: string): Promise<MensajeAVirgen | null> {
+    return this.mensajesVirgenRepository.findOne({
+      where: { id },
+      relations: ['usuario'],
+    });
+  }
 
   async updateMensajeVirgen(
     id: string,

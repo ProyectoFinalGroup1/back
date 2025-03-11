@@ -37,20 +37,66 @@ export class MensajesVirgenService {
 
   async deleteMensajeVirgen(id: string): Promise<void> {
     try {
-      const result =
-        await this.MensajesVirgenRepository.deleteMensajeVirgen(id);
-      //Enviamos el correo para notificar al usuario del rechazo de su mensaje a la virgen
-      if (result.usuario && result.usuario.email) {
-        await this.emailService.sendMessageRejectionEmail(
-          result.usuario.email,
-          result.usuario.nombre || 'Usuario',
+      // Primero, obtener el mensaje con la relación de usuario
+      // Podemos crear un nuevo método en el repositorio para esto
+      const mensaje = await this.obtenerMensajeConUsuario(id);
+
+      if (!mensaje) {
+        throw new NotFoundException('Mensaje no encontrado');
+      }
+
+      // Guardar la información del usuario antes de eliminar el mensaje
+      const usuarioInfo = mensaje.usuario
+        ? {
+            idUser: mensaje.usuario.idUser,
+            nombre: mensaje.usuario.nombre,
+            email: mensaje.usuario.email,
+          }
+        : null;
+
+      console.log(
+        'Información de usuario capturada antes de eliminación:',
+        usuarioInfo,
+      );
+
+      // Ahora eliminar el mensaje usando el método existente
+      await this.MensajesVirgenRepository.deleteMensajeVirgen(id);
+
+      // Si tenemos información del usuario, enviar el correo
+      if (usuarioInfo && usuarioInfo.email) {
+        console.log(`Enviando correo de notificación a ${usuarioInfo.email}`);
+
+        const emailResult = await this.emailService.sendMessageRejectionEmail(
+          usuarioInfo.email,
+          usuarioInfo.nombre || 'Usuario',
+        );
+
+        console.log(
+          `Resultado de envío de correo: ${emailResult ? 'Éxito' : 'Fallo'}`,
+        );
+      } else {
+        console.log(
+          'No se encontró información de correo para enviar notificación',
         );
       }
     } catch (error) {
-      console.error('Error al eliminar mensaje a la virgen:', error);
+      console.error('Error en el proceso de eliminación:', error);
       throw new NotFoundException(
-        'El mensaje a la virgen no encontrado o no se pudo eliminar',
+        'Error al procesar la eliminación del mensaje',
       );
+    }
+  }
+
+  // Método auxiliar para obtener el mensaje con el usuario y poder enviar la notificacion de msj rechazado
+  private async obtenerMensajeConUsuario(
+    id: string,
+  ): Promise<MensajeAVirgen | null> {
+    try {
+      // Usar el nuevo método del repositorio
+      return await this.MensajesVirgenRepository.getMensajeConUsuario(id);
+    } catch (error) {
+      console.error('Error al obtener mensaje con usuario:', error);
+      return null;
     }
   }
 
