@@ -64,8 +64,8 @@ export class UserController {
   }
 
   //Administrador
-  @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard)
+  // @Roles(Role.Admin)
+  // @UseGuards(AuthGuard, RolesGuard)
   @Get('datos/:id')
   async UserAllAdmin(@Param('id') id: string) {
     const UserAll = await this.userService.allUserAdmin(id);
@@ -95,8 +95,8 @@ export class UserController {
     description: 'Usuario actualizado exitosamente',
     type: User,
   })
-  @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard)
+  // @Roles(Role.Admin)
+  // @UseGuards(AuthGuard, RolesGuard)
   @Patch('datos/:id')
   async UpdateUser(
     @Param('id') idUser: string,

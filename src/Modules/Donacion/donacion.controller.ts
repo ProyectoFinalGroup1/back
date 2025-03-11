@@ -19,7 +19,7 @@ import { Donacion } from 'src/Entities/donacion.entity';
 import { DonacionDto } from './donacionDTO';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('donaciones')
+@ApiTags('Donaciones')
 @Controller('mercadopago')
 export class DonacionController {
   private readonly logger = new Logger(DonacionController.name);

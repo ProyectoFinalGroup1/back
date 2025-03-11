@@ -60,7 +60,17 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+      filter: true,
+      syntaxHighlight: {
+        activated: true,
+        theme: 'agate',
+      },
+    },
+  });
 
   await app.listen(process.env.PORT || 3000);
 }
