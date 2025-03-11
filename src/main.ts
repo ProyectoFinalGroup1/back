@@ -60,7 +60,12 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      tagsSorter: 'alpha', // Ordena las etiquetas alfabéticamente
+      operationsSorter: 'alpha', // Ordena los endpoints dentro de cada etiqueta
+    },
+  });
 
   await app.listen(process.env.PORT || 3000);
 }
