@@ -83,17 +83,24 @@ export class MensajesVirgenRepository {
     return await this.mensajesVirgenRepository.save(existingMsj);
   }
 
-  async deleteMensajeVirgen(id: string): Promise<string> {
+  async deleteMensajeVirgen(
+    id: string,
+  ): Promise<{ mensaje: string; usuario: User }> {
     const mensajeVirgen = await this.mensajesVirgenRepository.findOne({
       where: { id: id },
+      relations: ['usuario'],
     });
 
     if (!mensajeVirgen) {
       throw new NotFoundException('Publicación no encontrada');
     }
 
+    const usuarioInfo = mensajeVirgen.usuario;
     await this.mensajesVirgenRepository.remove(mensajeVirgen);
-    return `eliminado mensaje ${id}`;
+    return {
+      mensaje: `mensaje eliminado ${id}`,
+      usuario: usuarioInfo,
+    };
   }
 
   async updateMensajeVirgen(

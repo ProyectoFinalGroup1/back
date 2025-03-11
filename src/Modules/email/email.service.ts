@@ -255,4 +255,39 @@ export class EmailService {
       return false;
     }
   }
+
+  //MENSAJES A LA VIRGEN RECHAZADOS
+  async sendMessageRejectionEmail(email: string, nombreUsuario: string) {
+    try {
+      const mailOptions = {
+        from: `"Cementerio Valle de Paz" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: 'Mensaje a la Virgen - No aprobado',
+        html: `
+          <div style="text-align: center; font-family: Arial, sans-serif;">
+            <img src="https://raw.githubusercontent.com/ProyectoFinalGroup1/front/develop/public/images/logo.jpg" alt="Logo Cementerio" style="max-width: 200px;">
+            <h1 style="color: #333;">Notificación sobre su mensaje</h1>
+            <p style="color: #666; font-size: 16px;">Estimado/a ${nombreUsuario},</p>
+            <p style="color: #666; font-size: 16px;">Lamentamos informarle que su mensaje a la Virgen no ha sido aprobado para su publicación debido a que contiene información sensible o inapropiada según nuestras políticas.</p>
+            <p style="color: #666; font-size: 16px;">Le invitamos a enviar un nuevo mensaje respetando nuestras normas de comunidad.</p>
+            <p style="color: #666; font-size: 16px;">Agradecemos su comprensión.</p>
+            <hr style="border: 1px solid #eee; margin: 20px 0;">
+            <p style="color: #999; font-size: 12px;">Este es un correo automático, por favor no responder.</p>
+          </div>
+        `,
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(
+        `Email de notificación de mensaje rechazado enviado a ${email}`,
+      );
+      return true;
+    } catch (error) {
+      this.logger.error(
+        `Error al enviar email de notificación de rechazo a ${email}:`,
+        error,
+      );
+      return false;
+    }
+  }
 }
