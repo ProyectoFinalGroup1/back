@@ -38,8 +38,8 @@ export class MensajesVirgenService {
   async deleteMensajeVirgen(id: string): Promise<void> {
     try {
       // Primero, obtener el mensaje con la relación de usuario
-      // Podemos crear un nuevo método en el repositorio para esto
-      const mensaje = await this.obtenerMensajeConUsuario(id);
+      const mensaje =
+        await this.MensajesVirgenRepository.getMensajeConUsuario(id);
 
       if (!mensaje) {
         throw new NotFoundException('Mensaje no encontrado');
@@ -66,14 +66,22 @@ export class MensajesVirgenService {
       if (usuarioInfo && usuarioInfo.email) {
         console.log(`Enviando correo de notificación a ${usuarioInfo.email}`);
 
-        const emailResult = await this.emailService.sendMessageRejectionEmail(
-          usuarioInfo.email,
-          usuarioInfo.nombre || 'Usuario',
-        );
+        try {
+          const emailResult = await this.emailService.sendMessageRejectionEmail(
+            usuarioInfo.email,
+            usuarioInfo.nombre || 'Usuario',
+          );
 
-        console.log(
-          `Resultado de envío de correo: ${emailResult ? 'Éxito' : 'Fallo'}`,
-        );
+          console.log(
+            `Resultado de envío de correo: ${emailResult ? 'Éxito' : 'Fallo'}`,
+          );
+        } catch (emailError) {
+          console.error(
+            'Error al enviar el correo de notificación:',
+            emailError,
+          );
+          // No lanzamos el error para no interrumpir el flujo principal si el correo falla
+        }
       } else {
         console.log(
           'No se encontró información de correo para enviar notificación',
@@ -81,22 +89,9 @@ export class MensajesVirgenService {
       }
     } catch (error) {
       console.error('Error en el proceso de eliminación:', error);
-      throw new NotFoundException(
-        'Error al procesar la eliminación del mensaje',
+      throw new Error(
+        `Error al procesar la eliminación del mensaje: ${error.message}`,
       );
-    }
-  }
-
-  // Método auxiliar para obtener el mensaje con el usuario y poder enviar la notificacion de msj rechazado
-  private async obtenerMensajeConUsuario(
-    id: string,
-  ): Promise<MensajeAVirgen | null> {
-    try {
-      // Usar el nuevo método del repositorio
-      return await this.MensajesVirgenRepository.getMensajeConUsuario(id);
-    } catch (error) {
-      console.error('Error al obtener mensaje con usuario:', error);
-      return null;
     }
   }
 
