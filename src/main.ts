@@ -62,8 +62,13 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
-      tagsSorter: 'alpha', // Ordena las etiquetas alfabéticamente
-      operationsSorter: 'alpha', // Ordena los endpoints dentro de cada etiqueta
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+      filter: true,
+      syntaxHighlight: {
+        activated: true,
+        theme: 'agate',
+      },
     },
   });
 
