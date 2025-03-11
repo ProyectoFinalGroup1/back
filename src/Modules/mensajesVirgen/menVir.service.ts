@@ -20,10 +20,12 @@ export class MensajesVirgenService {
     return await this.MensajesVirgenRepository.uploadImage(file);
   }
   async addMensajeVirgen(
-    mensajeVirgen: Partial<MensajeAVirgen>,
+    id: string,
+    mensajeVirgen: string,
     imgCloudinary: string | undefined,
   ) {
     return await this.MensajesVirgenRepository.addMensajeVirgen(
+      id,
       mensajeVirgen,
       imgCloudinary,
     );

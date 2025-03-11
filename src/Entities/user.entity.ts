@@ -104,6 +104,7 @@ export class User {
     description: 'Publicaciones del usario',
   })
   @OneToMany(() => Publicacion, (publicacion) => publicacion.usuario, {
+    onDelete: 'CASCADE',
     cascade: true,
   })
   publicaciones: Publicacion[];

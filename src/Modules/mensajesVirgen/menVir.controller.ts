@@ -20,7 +20,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { AuthGuard } from '../Guards/Jwt/AuthGuards';
 import { Role } from '../Guards/Roles/roles.enum';
 import { Roles } from '../Guards/Roles/roles.decorator';
-import { RolesGuard } from '../Guards/Roles/Roles.guard';
+// import { RolesGuard } from '../Guards/Roles/Roles.guard';
 import { MensajeAVirgen } from 'src/Entities/mensajesVirgen.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -43,8 +43,7 @@ export class MensajesVirgenController {
     return await this.mensajesVirgenService.filterMSsjs();
   }
 
-  
-  @Post('addMensajeVirgen')
+  @Post('addMensajeVirgen/:id')
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Agregar un mensaje a la virgen ' })
   async addMensajeVirgen(
@@ -63,7 +62,8 @@ export class MensajesVirgenController {
       }),
     )
     file: Express.Multer.File | undefined,
-    @Body() mensajeVirgen: Partial<MensajeAVirgen>,
+    @Param('id') id: string,
+    @Body() mensajeVirgen: string,
   ) {
     let ImgCloudinary: string | undefined = undefined;
     if (file) {
@@ -71,6 +71,7 @@ export class MensajesVirgenController {
     }
 
     const newMsjVirgen = await this.mensajesVirgenService.addMensajeVirgen(
+      id,
       mensajeVirgen,
       ImgCloudinary,
     );
