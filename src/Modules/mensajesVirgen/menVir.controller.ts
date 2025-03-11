@@ -43,10 +43,10 @@ export class MensajesVirgenController {
     return await this.mensajesVirgenService.filterMSsjs();
   }
 
-  @UseGuards(AuthGuard)
+  
   @Post('addMensajeVirgen')
   @UseInterceptors(FileInterceptor('file'))
-  @ApiOperation({ summary: 'Agregar un mensaje a la virgen' })
+  @ApiOperation({ summary: 'Agregar un mensaje a la virgen ' })
   async addMensajeVirgen(
     @UploadedFile(
       new ParseFilePipe({
