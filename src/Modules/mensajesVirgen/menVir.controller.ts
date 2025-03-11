@@ -78,14 +78,14 @@ export class MensajesVirgenController {
   }
 
   @Roles(Role.Admin)
-  @UseGuards(AuthGuard)
+  //@UseGuards(AuthGuard)
   @Patch(':id')
   async aprobarMsj(@Param('id') id: string) {
     return this.mensajesVirgenService.aprobado(id);
   }
 
   @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard)
+  //@UseGuards(AuthGuard, RolesGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar una mensajes a la virgen por ID' })
   async deleteMensajeVirgen(@Param('id') id: string) {
