@@ -152,25 +152,22 @@ export class InhumadoController {
   }
 
   @Put(':id')
-  @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard)
-  @ApiOperation({ summary: 'Acutualizar un inhumado por id' })
-  @ApiParam({
-    name: 'id',
-    type: 'string',
-    description: 'ID del inhumado (UUID)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Inhumado actualizado exitosamente',
-    type: Inhumado,
-  })
-  async updateInhumado(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() inhumado: Partial<Inhumado>,
-  ) {
-    return await this.inhumadosService.updateInhumado(id, inhumado);
+@Roles(Role.Admin)
+@UseGuards(AuthGuard, RolesGuard)
+@UseInterceptors(FileInterceptor('imagen'))
+@ApiOperation({ summary: 'Actualizar un inhumado por id' })
+async updateInhumado(
+  @Param('id', ParseUUIDPipe) id: string,
+  @Body() inhumado: Partial<Inhumado>,
+  @UploadedFile() file?: Express.Multer.File,
+) {
+  let imageUrl;
+  if (file) {
+    imageUrl = await this.inhumadosService.uploadImage(file);
+    inhumado.imagenUrl = imageUrl;
   }
+  return await this.inhumadosService.updateInhumado(id, inhumado);
+}
 
   @Delete(':id')
   @Roles(Role.Admin)
