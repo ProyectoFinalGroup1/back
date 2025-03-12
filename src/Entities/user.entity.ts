@@ -97,7 +97,9 @@ export class User {
   @Column({ type: 'boolean', default: false })
   isAdmin?: boolean;
 
-  @OneToMany(() => Donacion, (donacion) => donacion.DonacionUser)
+  @OneToMany(() => Donacion, (donacion) => donacion.DonacionUser, {
+    onDelete: 'CASCADE',
+  })
   donacion: Donacion;
 
   @ApiProperty({

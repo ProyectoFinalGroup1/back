@@ -8,6 +8,7 @@ import { MensajeAVirgen } from 'src/Entities/mensajesVirgen.entity';
 import { User } from 'src/Entities/user.entity';
 import { Repository } from 'typeorm';
 import { v2 as cloudinary } from 'cloudinary';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class MensajesVirgenRepository {
@@ -15,6 +16,7 @@ export class MensajesVirgenRepository {
     @InjectRepository(MensajeAVirgen)
     private mensajesVirgenRepository: Repository<MensajeAVirgen>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    private emailService: EmailService,
   ) {
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -77,21 +79,33 @@ export class MensajesVirgenRepository {
   async aprobado(id) {
     const existingMsj = await this.mensajesVirgenRepository.findOne({
       where: { id: id },
+      relations: ['usuario'],
     });
     if (!existingMsj) throw new NotFoundException('No se encontro mensaje');
     existingMsj.estado = true;
+    const email = existingMsj.usuario.email;
+    await this.emailService.sendApprovalEmail(
+      email,
+      existingMsj.usuario.nombre,
+    );
+
     return await this.mensajesVirgenRepository.save(existingMsj);
   }
 
   async deleteMensajeVirgen(id: string): Promise<string> {
     const mensajeVirgen = await this.mensajesVirgenRepository.findOne({
       where: { id: id },
+      relations: ['usuario'],
     });
 
     if (!mensajeVirgen) {
       throw new NotFoundException('Publicación no encontrada');
     }
-
+    const email = mensajeVirgen.usuario.email;
+    await this.emailService.sendRejectionEmail(
+      email,
+      mensajeVirgen.usuario.nombre,
+    );
     await this.mensajesVirgenRepository.remove(mensajeVirgen);
     return `eliminado mensaje ${id}`;
   }

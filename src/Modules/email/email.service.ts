@@ -59,6 +59,65 @@ export class EmailService {
       }
     }
   }
+  ///////////publicacion / ACEPTADO
+  async sendApprovalEmail(email: string, nombre: string) {
+    try {
+      const mailOptions = {
+        from: `"Cementerio Valle de Paz" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject:
+          'Mensaje/Publicación Aprobado - Cementerio Parque Valle de Paz',
+        html: `
+        <div style="text-align: center; font-family: Arial, sans-serif;">
+          <img src="https://raw.githubusercontent.com/ProyectoFinalGroup1/front/develop/public/images/logo.jpg" 
+               alt="Logo Cementerio" style="max-width: 200px;">
+          <h1 style="color: #5cb85c;">Estimado/a ${nombre},</h1>
+          <p style="color: #666; font-size: 16px;">Nos complace informarte que tu mensaje ha sido aprobado.</p>
+          <p style="color: #666; font-size: 16px;">Tu publicación ya está disponible en nuestro sitio.</p>
+          <p style="color: #666; font-size: 16px;">Gracias por compartir tus pensamientos y recuerdos con nosotros.</p>
+          <hr style="border: 1px solid #eee; margin: 20px 0;">
+          <p style="color: #999; font-size: 12px;">Este es un correo automático, por favor no responder.</p>
+          <p style="color: #666; font-size: 16px;">Si tienes alguna duda, no dudes en contactarnos.</p>
+        </div>
+        `,
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      console.log(`Correo de aprobación enviado a ${email}`);
+    } catch (error) {
+      console.error('Error enviando el correo de aprobación:', error);
+    }
+  }
+  /////// publicacion / mensaje RECHAZADO
+  async sendRejectionEmail(email: string, nombre: string) {
+    try {
+      const mailOptions = {
+        from: `"Cementerio Valle de Paz" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject:
+          'Mensaje/Publicacion Rechazado - Cementerio Parque Valle de Paz',
+        html: `
+        <div style="text-align: center; font-family: Arial, sans-serif;">
+          <img src="https://raw.githubusercontent.com/ProyectoFinalGroup1/front/develop/public/images/logo.jpg" 
+               alt="Logo Cementerio" style="max-width: 200px;">
+          <h1 style="color: #D9534F;">Estimado/a ${nombre},</h1>
+          <p style="color: #666; font-size: 16px;">Lamentamos informarte que tu mensaje ha sido rechazado.</p>
+          <p style="color: #666; font-size: 16px;">El contenido enviado no cumple con nuestras normas y políticas.</p>
+          <p style="color: #666; font-size: 16px;">Por favor, revisa nuestras reglas y vuelve a intentarlo.</p>
+          <hr style="border: 1px solid #eee; margin: 20px 0;">
+          <p style="color: #999; font-size: 12px;">Este es un correo automático, por favor no responder.</p>
+          <p style="color: #666; font-size: 16px;">Si consideras que esto fue un error, contáctanos para más información.</p>
+        </div>
+      `,
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      console.log(`Correo de rechazo enviado a ${email}`);
+    } catch (error) {
+      console.error('Error enviando el correo de rechazo:', error);
+    }
+  }
+  /////////
 
   async sendWelcomeEmail(email: string, nombre: string) {
     try {
