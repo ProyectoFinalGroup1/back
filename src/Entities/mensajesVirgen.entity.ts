@@ -13,7 +13,7 @@ export class MensajeAVirgen {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, (user) => user.idUser)
+  @ManyToOne(() => User, (user) => user.mensajesAVirgen)
   @JoinColumn({ name: 'usuario_id' })
   usuario: User;
 

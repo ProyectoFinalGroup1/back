@@ -112,7 +112,7 @@ export class User {
   @ApiProperty({
     description: 'Mensajes a la virgen del usuario',
   })
-  @OneToMany(() => MensajeAVirgen, (mensaje) => mensaje.id, {
+  @OneToMany(() => MensajeAVirgen, (mensaje) => mensaje.usuario, {
     cascade: true,
   })
   mensajesAVirgen: MensajeAVirgen[];
