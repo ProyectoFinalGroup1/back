@@ -10,6 +10,7 @@ import { Inhumado } from 'src/Entities/inhumados.entity';
 import { User } from 'src/Entities/user.entity';
 // import { CreatePublicacionDto } from '../DTO/publicacionDto';
 import { v2 as cloudinary } from 'cloudinary';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class PublicacionesRepository {
@@ -19,6 +20,7 @@ export class PublicacionesRepository {
     @InjectRepository(Inhumado)
     private inhumadosRepository: Repository<Inhumado>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    private emailService: EmailService,
   ) {
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -100,6 +102,7 @@ export class PublicacionesRepository {
   async aprobarPublicacion(id: string): Promise<Publicacion | null> {
     const publicacion = await this.publicacionesRepository.findOne({
       where: { id },
+      relations: ['usuario'],
     });
 
     if (!publicacion) {
@@ -107,16 +110,29 @@ export class PublicacionesRepository {
     }
 
     publicacion.aprobada = true;
+
+    const email = publicacion.usuario.email;
+    await this.emailService.sendApprovalEmail(
+      email,
+      publicacion.usuario.nombre,
+    );
     return await this.publicacionesRepository.save(publicacion);
   }
 
   async deletePublicacion(id: string): Promise<string> {
-    const publicacion = await this.publicacionesRepository.findOneBy({ id });
+    const publicacion = await this.publicacionesRepository.findOne({
+      where: { id: id },
+      relations: ['usuario'],
+    });
 
     if (!publicacion) {
       throw new NotFoundException('Publicación no encontrada');
     }
-
+    const email = publicacion.usuario.email;
+    await this.emailService.sendRejectionEmail(
+      email,
+      publicacion.usuario.nombre,
+    );
     await this.publicacionesRepository.remove(publicacion);
     return id;
   }
