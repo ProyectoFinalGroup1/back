@@ -19,6 +19,7 @@ import { inhumadosService } from './inhumado.service';
 import { Inhumado } from 'src/Entities/inhumados.entity';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -39,7 +40,13 @@ export class InhumadoController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
   @Get('seeder')
-  @ApiOperation({ summary: 'Obtener seeder :D' })
+  @ApiOperation({
+    summary: 'Ejecutar seeder de inhumados (solo administradores)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Seeder ejecutado exitosamente',
+  })
   async seed() {
     await this.inhumadosService.seed();
     return { message: 'sedder exitoso' }; //borrar
@@ -110,6 +117,10 @@ export class InhumadoController {
     description: 'Inhumado encontrado',
     type: Inhumado,
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Inhumado no encontrado',
+  })
   async getInhumadoByNombreApellido(
     @Param('nombre') nombre: string,
     @Param('apellido') apellido: string,
@@ -121,6 +132,21 @@ export class InhumadoController {
   }
 
   @Get('valle/:valle')
+  @ApiOperation({ summary: 'Obtener inhumados por valle' })
+  @ApiParam({
+    name: 'valle',
+    description: 'Valle donde se encuentran los inhumados',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de inhumados por valle obtenida exitosamente',
+    type: [Inhumado],
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No se encontraron inhumados en el valle especificado',
+  })
   @UseGuards(AuthGuard)
   async getInhumadosByValle(
     @Param('valle') valle: string,
@@ -152,22 +178,40 @@ export class InhumadoController {
   }
 
   @Put(':id')
-@Roles(Role.Admin)
-@UseGuards(AuthGuard, RolesGuard)
-@UseInterceptors(FileInterceptor('imagen'))
-@ApiOperation({ summary: 'Actualizar un inhumado por id' })
-async updateInhumado(
-  @Param('id', ParseUUIDPipe) id: string,
-  @Body() inhumado: Partial<Inhumado>,
-  @UploadedFile() file?: Express.Multer.File,
-) {
-  let imageUrl;
-  if (file) {
-    imageUrl = await this.inhumadosService.uploadImage(file);
-    inhumado.imagenUrl = imageUrl;
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @UseInterceptors(FileInterceptor('imagen'))
+  @ApiOperation({ summary: 'Actualizar un inhumado por id' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'ID del inhumado a actualizar (UUID)',
+  })
+  @ApiBody({
+    type: Inhumado,
+    description: 'Datos del inhumado a actualizar',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Inhumado actualizado exitosamente',
+    type: Inhumado,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Inhumado no encontrado',
+  })
+  async updateInhumado(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() inhumado: Partial<Inhumado>,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    let imageUrl;
+    if (file) {
+      imageUrl = await this.inhumadosService.uploadImage(file);
+      inhumado.imagenUrl = imageUrl;
+    }
+    return await this.inhumadosService.updateInhumado(id, inhumado);
   }
-  return await this.inhumadosService.updateInhumado(id, inhumado);
-}
 
   @Delete(':id')
   @Roles(Role.Admin)
@@ -184,7 +228,7 @@ async updateInhumado(
   })
   @ApiResponse({
     status: 400,
-    description: 'Error al agregar el inhumado',
+    description: 'Error al eliminar el inhumado',
   })
   @ApiResponse({
     status: 404,

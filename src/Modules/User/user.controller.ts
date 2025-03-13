@@ -23,6 +23,7 @@ import { Roles } from '../Guards/Roles/roles.decorator';
 import { RolesGuard } from '../Guards/Roles/Roles.guard';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -37,7 +38,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class UserController {
   constructor(private readonly userService: userService) {}
 
-  @ApiOperation({ summary: 'Obtener todos los usuarios' })
+  @ApiOperation({ summary: 'Obtener todos los usuarios(solo admin)' })
   @ApiResponse({
     status: 200,
     description: 'Lista de usuarios obtenida exitosamente',
@@ -67,6 +68,19 @@ export class UserController {
   // @Roles(Role.Admin)
   // @UseGuards(AuthGuard, RolesGuard)
   @Get('datos/:id')
+  @ApiOperation({
+    summary: 'Obtener datos completos de un usuario',
+  })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'ID del usuario a consultar',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Datos completos del usuario obtenidos exitosamente',
+    type: User,
+  })
   async UserAllAdmin(@Param('id') id: string) {
     const UserAll = await this.userService.allUserAdmin(id);
     return UserAll;
@@ -76,6 +90,15 @@ export class UserController {
   @UseGuards(AuthGuard)
   @ApiOperation({
     summary: 'Actualizar preferencias de notificaciones del usuario',
+  })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID del usuario' })
+  @ApiBody({
+    type: UpdateUserPreferencesDto,
+    description: 'Datos de preferencias a actualizar',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Preferencias de usuario actualizadas exitosamente',
   })
   async updatePreferences(
     @Param('id') idUser: string,
@@ -124,6 +147,23 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Subir imagen de perfil para user' })
+  @ApiParam({ name: 'userId', type: 'string', description: 'ID del usuario' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Archivo de imagen para perfil (JPG o PNG, máx 2MB)',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Imagen de perfil subida exitosamente',
+  })
   @Post('uploadImmagenPerfil/:userId')
   @UseInterceptors(FileInterceptor('file'))
   async uploadImgPerfil(
@@ -148,6 +188,23 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Actualizar imagen de perfil para user' })
+  @ApiParam({ name: 'userId', type: 'string', description: 'ID del usuario' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Archivo de imagen para perfil (JPG o PNG, máx 2MB)',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Imagen de perfil actualizada exitosamente',
+  })
   @Put('updateImagenPerfil/:userId')
   @UseInterceptors(FileInterceptor('file'))
   async updateImgPerfil(

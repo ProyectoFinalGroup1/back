@@ -16,7 +16,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { PublicacionesService } from './publi.service';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { AuthGuard } from '../Guards/Jwt/AuthGuards';
 import { Role } from '../Guards/Roles/roles.enum';
 import { Roles } from '../Guards/Roles/roles.decorator';
@@ -30,6 +30,9 @@ export class PublicacionesController {
 
   //ADMINISTRADOR
   @Get('pendientes')
+  @ApiOperation({
+    summary: 'Obtener todas las publicaciones pendientes de aprobacion',
+  })
   async publicacionesPendientes() {
     return await this.publicacionesService.pendientes();
   }
@@ -37,6 +40,9 @@ export class PublicacionesController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
   @Get('')
+  @ApiOperation({
+    summary: 'Obtener todas las operaciones(solo Administradores)',
+  })
   async allPublicaciones() {
     return this.publicacionesService.allPublication();
   }
@@ -81,6 +87,10 @@ export class PublicacionesController {
 
   /////////// FALTA AGREGAR LOS ROLES Y GUARDS
   @Get('misPublicaciones/:id')
+  @ApiOperation({
+    summary: 'Obtener publicaciones de un usuario especifico por ID',
+  })
+  @ApiParam({ name: 'id', description: 'ID del usuario', type: 'string' })
   async misPublicaciones(@Param('id') id: string) {
     return await this.publicacionesService.misPublicaciones(id);
   }
@@ -89,6 +99,11 @@ export class PublicacionesController {
   @UseGuards(AuthGuard, RolesGuard) // Solo admin
   @Patch(':id')
   @ApiOperation({ summary: 'Aprobar una publicación' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID de la publicacion a aprobar',
+    type: 'string',
+  })
   async aprobarPublicacion(@Param('id') id: string) {
     return await this.publicacionesService.aprobarPublicacion(id);
   }
@@ -97,6 +112,11 @@ export class PublicacionesController {
   @UseGuards(AuthGuard, RolesGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar una publicación por ID' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID de la publicacion a eliminar',
+    type: 'string',
+  })
   async deletePublicacion(@Param('id') id: string) {
     return await this.publicacionesService.deletePublicacion(id);
   }
@@ -104,13 +124,28 @@ export class PublicacionesController {
   @UseGuards(AuthGuard)
   @Get(':nombreInhumado')
   @ApiOperation({ summary: 'Obtener publicaciones por nombre de inhumado' })
+  @ApiParam({
+    name: 'nombreInhumado',
+    description: 'Nombre del inhumado a buscar',
+    type: 'string',
+  })
   async getPublicacionesByInhumado(@Param('nombreInhumado') nombre: string) {
     return await this.publicacionesService.getPublicacionesByInhumado(nombre);
   }
 
   @UseGuards(AuthGuard)
   @Patch('editar/:id')
-  @ApiOperation({ summary: 'Editar una publicación,' })
+  @ApiOperation({ summary: 'Editar una publicación' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID de la publicación a editar',
+    type: 'string',
+  })
+  @ApiBody({
+    type: CreatePublicacionDto,
+    required: false,
+    description: 'Datos de la publicación a actualizar',
+  })
   async updatePublicacion(
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile(

@@ -13,6 +13,8 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiBody,
+  ApiParam,
 } from '@nestjs/swagger';
 import { UsuarioInhumadoService } from './usuario-inhumado.service';
 import { CrearUsuarioInhumadoDto } from './crear-usuario-inhumado.dto';
@@ -33,6 +35,10 @@ export class UsuarioInhumadoController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear asociación entre usuario e inhumado' })
+  @ApiBody({
+    type: CrearUsuarioInhumadoDto,
+    description: 'Datos para crear la asociación entre usuario e inhumado',
+  })
   @ApiResponse({ status: 201, description: 'Asociación creada exitosamente' })
   @ApiResponse({
     status: 400,
@@ -58,6 +64,11 @@ export class UsuarioInhumadoController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Eliminar asociación' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'ID de la asociación a eliminar',
+  })
   @ApiResponse({
     status: 200,
     description: 'Asociación eliminada exitosamente',
@@ -71,9 +82,18 @@ export class UsuarioInhumadoController {
   @Get('usuario/:id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Obtener inhumados asociados a un usuario' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'ID del usuario para obtener sus inhumados asociados',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de inhumados obtenida exitosamente',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
   })
   async obtenerInhumadosPorUsuario(@Param('id') usuarioId: string) {
     return await this.usuarioInhumadoService.obtenerInhumadosPorUsuario(
@@ -84,9 +104,18 @@ export class UsuarioInhumadoController {
   @Get('inhumado/:id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Obtener usuarios asociados a un inhumado' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'ID del inhumado para obtener sus usuarios asociados',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de usuarios obtenida exitosamente',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Inhumado no encontrado',
   })
   async obtenerUsuariosPorInhumado(@Param('id') inhumadoId: string) {
     return await this.usuarioInhumadoService.obtenerUsuariosPorInhumado(
